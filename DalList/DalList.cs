@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DalList;
+
 
 namespace Dal;
 
@@ -12,9 +12,9 @@ namespace Dal;
     {
     private DalList() {
     }
-    private readonly DalList instance =new DalList();
-    public int MyProperty { get; set; }
-    public readonly static DalList Instance = { get  instance };
+    private static readonly DalList instance = new DalList();
+   
+    public  static DalList Instance => instance;
         public ISale Sale => new SaleImplementation();
         public IProduct Product => new ProductImplementation();
         public ICustomer Customer => new CustomerImplementation();

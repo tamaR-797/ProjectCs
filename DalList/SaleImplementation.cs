@@ -8,7 +8,7 @@ using Tools;
 using System.Collections.Generic;
 using System;
 
-namespace DalList
+namespace Dal
 {
     internal class SaleImplementation : ISale
     {

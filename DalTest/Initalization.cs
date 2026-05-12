@@ -2,6 +2,7 @@
 using DalApi;
 using Dal;
 
+
 namespace DalTest; 
 
 public static class Initalization

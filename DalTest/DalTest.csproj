@@ -13,7 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DalFacade\DalFacade.csproj" />
+    <ProjectReference Include="..\DalFacade\DalFacade.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DalList\DalList.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Tools\Tools.csproj">
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
