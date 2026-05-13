@@ -10,12 +10,13 @@ internal class SaleImplementation : BlApi.ISale
     public IEnumerable<BO.SaleForList> GetSalesList()
     {
         return from DO.Order doOrd in _dal.Order.ReadAll()
+               let orderItems = _dal.OrderItem.ReadAll(oi => oi?.OrderId == doOrd.Id)
                select new BO.SaleForList
                {
                    OrderId = doOrd.OrderId,
                    CustomerName = _dal.Customer.Read(doOrd.CustomerId)?.CustName ?? "Unknown",
-                   AmountOfItems = _dal.OrderItem.ReadAll(oi => oi?.OrderId == doOrd.OrderId).Count(),
-                   TotalPrice = _dal.OrderItem.ReadAll(oi => oi?.OrderId == doOrd.OrderId).Sum(oi => (oi?.Price ?? 0) * (oi?.Amount ?? 0))
+                   AmountOfItems = orderItems.Count(),
+                   TotalPrice = orderItems.Sum(oi => (oi?.PricePerUnit ?? 0) * (oi?.Quantity ?? 0))
                };
     }
 
@@ -23,28 +24,10 @@ internal class SaleImplementation : BlApi.ISale
     public BO.Sale UpdateOrderShipping(int id) => throw new NotImplementedException();
     public BO.Sale UpdateOrderDelivery(int id) => throw new NotImplementedException();
 
-    public IEnumerable<Sale?> GetAllSales()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AddSale(Sale sale)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateSale(Sale sale)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void DeleteSale(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IEnumerable<Sale?> GetActiveSalesByProduct(int productId)
-    {
-        throw new NotImplementedException();
-    }
+    // מימושים ריקים עבור שאר פונקציות הממשק
+    public IEnumerable<Sale?> GetAllSales() => throw new NotImplementedException();
+    public void AddSale(Sale sale) => throw new NotImplementedException();
+    public void UpdateSale(Sale sale) => throw new NotImplementedException();
+    public void DeleteSale(int id) => throw new NotImplementedException();
+    public IEnumerable<Sale?> GetActiveSalesByProduct(int productId) => throw new NotImplementedException();
 }

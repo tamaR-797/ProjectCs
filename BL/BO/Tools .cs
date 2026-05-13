@@ -126,9 +126,9 @@ namespace BO
             return new BO.SaleInProduct
             (
                 ProdId: s.ProdId,
-                QuantityInSale : s.QuantitySale ?? 0,
-                Price : s.SalePrice ?? 0,
-               ForClub :s.IsClub ?? false
+                QuantityInSale: s.QuantitySale ?? 0,
+                Price: s.SalePrice ?? 0,
+               ForClub: s.IsClub ?? false
             );
         }
         public static BO.ProductInOrder ConvertSaleToProductInOrder(this DO.Product s)
@@ -141,7 +141,33 @@ namespace BO
                 QuantityInOrder: s.QuantityInStock ?? 0
 
                 );
-        }          
- }              
+        }
+        public static string ToStringProperty<T>(this T obj)
+        {
+            if (obj == null) return "";
+
+            string str = "";
+            // מעבר על כל ה-Properties של האובייקט בזמן ריצה
+            foreach (PropertyInfo prop in obj.GetType().GetProperties())
+            {
+                var value = prop.GetValue(obj, null);
+
+                // טיפול במקרה של אוסף (List/Enumerable) בתוך הישות
+                if (value is IEnumerable enumerable && !(value is string))
+                {
+                    str += $"{prop.Name}: [";
+                    foreach (var item in enumerable)
+                        str += $"\n  {item}";
+                    str += "]\n";
+                }
+                else
+                {
+                    str += $"{prop.Name}: {value}\n";
+                }
+            }
+            return str;
+        }
+    }
+    }              
                 
                 

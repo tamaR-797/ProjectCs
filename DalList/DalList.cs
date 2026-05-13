@@ -1,4 +1,5 @@
 ﻿using DalApi;
+using DO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,14 @@ namespace Dal;
     private DalList() {
     }
     private static readonly DalList instance = new DalList();
-   
     public  static DalList Instance => instance;
-        public ISale Sale => new SaleImplementation();
-        public IProduct Product => new ProductImplementation();
-        public ICustomer Customer => new CustomerImplementation();
 
-    }
+    // מימושים של המאפיינים מהממשק IDal
+    public IOrder Order => new OrderImplementation(); 
+    public IOrderItem OrderItem => new OrderItemImplementation();
+    public ISale Sale => new SaleImplementation();
+    public IProduct Product => new ProductImplementation();
+    public ICustomer Customer => new CustomerImplementation();
+
+}
 

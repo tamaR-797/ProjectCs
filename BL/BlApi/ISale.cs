@@ -4,6 +4,7 @@ namespace BlApi;
 
 public interface ISale
 {
+    public IEnumerable<BO.SaleForList> GetSalesList();
     public IEnumerable<Sale?> GetAllSales();
     public Sale GetSaleDetails(int id);
     public void AddSale(Sale sale);
@@ -13,3 +14,4 @@ public interface ISale
     // פונקציית עזר לוגית: קבלת כל המבצעים הפעילים עבור מוצר ספציפי
     public IEnumerable<Sale?> GetActiveSalesByProduct(int productId);
 }
+

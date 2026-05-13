@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalTest\\DalTest.csproj": {}
+    "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj": {}
   },
   "projects": {
-    "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj": {
+    "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj",
+        "projectUniqueName": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj",
         "projectName": "DalFacade",
-        "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj",
-        "packagesPath": "C:\\Users\\localadmin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\obj\\",
+        "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj",
+        "packagesPath": "C:\\Users\\suser\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\localadmin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\suser\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -25,7 +25,7 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "c:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -38,7 +38,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -59,24 +65,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "c:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\DalList.csproj": {
+    "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\DalList.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\DalList.csproj",
+        "projectUniqueName": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\DalList.csproj",
         "projectName": "DalList",
-        "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\DalList.csproj",
-        "packagesPath": "C:\\Users\\localadmin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\obj\\",
+        "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\DalList.csproj",
+        "packagesPath": "C:\\Users\\suser\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\localadmin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\suser\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -84,18 +90,18 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "c:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj": {
-                "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj"
+              "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj": {
+                "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj"
               },
-              "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj": {
-                "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj"
+              "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj": {
+                "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj"
               }
             }
           }
@@ -104,7 +110,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -125,24 +137,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "c:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalTest\\DalTest.csproj": {
+    "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalTest\\DalTest.csproj",
+        "projectUniqueName": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj",
         "projectName": "DalTest",
-        "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalTest\\DalTest.csproj",
-        "packagesPath": "C:\\Users\\localadmin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalTest\\obj\\",
+        "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj",
+        "packagesPath": "C:\\Users\\suser\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\localadmin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\suser\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -150,21 +162,21 @@
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "c:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj": {
-                "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalFacade\\DalFacade.csproj"
+              "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj": {
+                "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalFacade\\DalFacade.csproj"
               },
-              "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\DalList.csproj": {
-                "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\DalList\\DalList.csproj"
+              "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\DalList.csproj": {
+                "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalList\\DalList.csproj"
               },
-              "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj": {
-                "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj"
+              "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj": {
+                "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj"
               }
             }
           }
@@ -173,7 +185,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -194,15 +212,16 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "c:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj": {
+    "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj": {
       "restore": {
-        "projectUniqueName": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj",
+        "projectUniqueName": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj",
         "projectName": "Tools",
-        "projectPath": "C:\\Users\\localadmin\\Downloads\\ProjectCs\\Tools\\Tools.csproj",
+        "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\Tools\\Tools.csproj",
+        "UsingMicrosoftNETSdk": false,
         "frameworks": {
           "net472": {
             "projectReferences": {}
