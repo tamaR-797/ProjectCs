@@ -1,62 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DalXml;
+﻿using DalApi;
 using DO;
-using System.Xml.Linq;
 
-namespace Dal
+
+namespace Dal;
+
+internal class SaleImplementation : ISale
 {
-    internal class SaleImplementation: ISale
+    // השינוי: הורדתי את @"xml\" ואת הסיומת, XMLTools מטפל בזה
+    readonly string s_path = "sales";
+
+    public int Create(Sale item)
     {
-        readonly string s_path = @"xml\sales.xml";
+        List<Sale?> list = XMLTools.LoadListFromXMLSerializer<Sale>(s_path);
 
-        public int Create(Sale item)
-        {
-            List<Sale> list = XMLTools.LoadListFromXmlSerializer<Sale>(s_path);
-            int nextId = Config.SaleId;
+        // השינוי: קריאה למאפיין המתוקן ב-Config
+        int nextId = Config.NextSaleId;
 
-            Sale newItem = item with { Id = nextId }; // יצירת עותק עם ה-ID החדש
-            list.Add(newItem);
+        Sale newItem = item with { SaleId = nextId };
+        list.Add(newItem);
 
-            XMLTools.SaveListToXmlSerializer(list, s_path);
-            return nextId;
-        }
+        XMLTools.SaveListToXMLSerializer(list, s_path);
+        return nextId;
+    }
 
-        public Sale? Read(int id) =>
-            XMLTools.LoadListFromXmlSerializer<Sale>(s_path).FirstOrDefault(s => s.Id == id);
+    public Sale? Read(int id) =>
+        XMLTools.LoadListFromXMLSerializer<Sale>(s_path).FirstOrDefault(s => s?.SaleId == id);
 
-        public Sale? Read(Func<Sale, bool> filter) =>
-            XMLTools.LoadListFromXmlSerializer<Sale>(s_path).FirstOrDefault(filter);
+    public Sale? Read(Func<Sale, bool> filter) =>
+        XMLTools.LoadListFromXMLSerializer<Sale>(s_path).FirstOrDefault(s => s != null && filter(s));
 
-        public List<Sale> ReadAll(Func<Sale, bool>? filter = null)
-        {
-            List<Sale> list = XMLTools.LoadListFromXmlSerializer<Sale>(s_path);
-            return filter == null ? list : list.Where(filter).ToList();
-        }
+    public List<Sale?> ReadAll(Func<Sale?, bool>? filter = null)
+    {
+        List<Sale?> list = XMLTools.LoadListFromXMLSerializer<Sale>(s_path);
+        return filter == null ? list : list.Where(filter).ToList();
+    }
 
-        public void Update(Sale item)
-        {
-            List<Sale> list = XMLTools.LoadListFromXmlSerializer<Sale>(s_path);
-            int index = list.FindIndex(s => s.Id == item.Id);
+    public void Update(Sale item)
+    {
+        List<Sale?> list = XMLTools.LoadListFromXMLSerializer<Sale>(s_path);
+        int index = list.FindIndex(s => s?.SaleId == item.SaleId);
 
-            if (index == -1) throw new Exception("Sale not found");
+        if (index == -1) throw new Exception($"Sale with ID {item.SaleId} not found");
 
-            list[index] = item;
-            XMLTools.SaveListToXmlSerializer(list, s_path);
-        }
+        list[index] = item;
+        XMLTools.SaveListToXMLSerializer(list, s_path);
+    }
 
-        public void Delete(int id)
-        {
-            List<Sale> list = XMLTools.LoadListFromXmlSerializer<Sale>(s_path);
-            Sale? item = list.FirstOrDefault(s => s.Id == id);
+    public void Delete(int id)
+    {
+        List<Sale?> list = XMLTools.LoadListFromXMLSerializer<Sale>(s_path);
+        if (list.RemoveAll(s => s?.SaleId == id) == 0) throw new Exception($"Sale with ID {id} not found");
 
-            if (item == null) throw new Exception("Sale not found");
-
-            list.Remove(item);
-            XMLTools.SaveListToXmlSerializer(list, s_path);
-        }
+        XMLTools.SaveListToXMLSerializer(list, s_path);
     }
 }

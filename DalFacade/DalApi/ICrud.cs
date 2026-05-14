@@ -4,7 +4,7 @@ using DO;
 
 namespace DalApi
 {
-    public interface ICrud<T>
+    public interface ICrud<T> where T : class
     {
         int Create(T t);
         T? Read(int id);

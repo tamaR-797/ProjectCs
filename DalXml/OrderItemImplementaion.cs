@@ -1,58 +1,46 @@
 ﻿using DO;
 using DalApi;
 using System.Reflection;
-using tools;
-using Dal;
+using Tools;
+
 namespace Dal;
 
 internal class OrderItemImplementaion : IOrderItem
 {
     // שם הקובץ בתיקיית הנתונים
-    readonly string s_orderItems_XML = "orderItems.xml";
-
+    readonly string s_orderItems_XML = "orderItems";
     public int Create(OrderItem item)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
-            MethodBase.GetCurrentMethod().Name, $"XML: Adding product {item.ProductId} to order {item.OrderId}");
+        LogManager.WriteToLog("DalXml", MethodBase.GetCurrentMethod()!.Name, $"XML: Adding Product {item.ProductId} to Order {item.OrderId}");
 
         List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-
-        // בדרך כלל ב-OrderItem משתמשים ב-ID רץ אם הוגדר כזה ב-DO
-        // כאן נניח שה-ID מנוהל ב-Config
-        int nextId = Config.NextOrderId;
-        OrderItem finalizedItem = item with { OrderId = nextId };
-
-        items.Add(finalizedItem);
+       
+        items.Add(item);
         XMLTools.SaveListToXMLSerializer(items, s_orderItems_XML);
 
-        return finalizedItem.OrderId;
+        return item.OrderId;
     }
 
-    public OrderItem? Read(int id)
-    {
-        List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-        return items.FirstOrDefault(oi => oi?.OrderId == id);
-    }
+    public OrderItem? Read(int id) =>
+         XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML).FirstOrDefault(oi => oi?.OrderId == id);
 
-    public OrderItem? Read(Func<OrderItem, bool> filter)
-    {
-        List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-        return items.FirstOrDefault(oi => oi != null && filter(oi));
-    }
+    public OrderItem? Read(Func<OrderItem, bool> filter) =>
+        XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML).FirstOrDefault(oi => oi != null && filter(oi));
 
-    public List<OrderItem?> ReadAll(Func<OrderItem, bool>? filter = null)
+    public List<OrderItem?> ReadAll(Func<OrderItem?, bool>? filter = null)
     {
         List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-        return filter == null ? items : items.Where(oi => oi != null && filter(oi)).ToList();
+        return filter == null ? items : items.Where(filter).ToList();
     }
 
     public void Update(OrderItem item)
     {
         List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
+        // חיפוש לפי OrderId ו-ProductId (מפתח מורכב בדרך כלל)
+        int index = items.FindIndex(oi => oi?.OrderId == item.OrderId && oi?.ProductId == item.ProductId);
 
-        int index = items.FindIndex(oi => oi?.OrderId == item.OrderId);
         if (index == -1)
-            throw new IdNotFoundException(item.OrderId, "OrderItem");
+            throw new IdNotFoundException($"OrderItem with Order ID {item.OrderId} and Product ID {item.ProductId}");
 
         items[index] = item;
         XMLTools.SaveListToXMLSerializer(items, s_orderItems_XML);
@@ -61,26 +49,25 @@ internal class OrderItemImplementaion : IOrderItem
     public void Delete(int id)
     {
         List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-
         if (items.RemoveAll(oi => oi?.OrderId == id) == 0)
-            throw new IdNotFoundException(id, "OrderItem");
+            throw new IdNotFoundException($"OrderItem with Order ID {id}");
 
         XMLTools.SaveListToXMLSerializer(items, s_orderItems_XML);
     }
 
     // --- מימוש מתודות ספציפיות מ-IOrderItem ---
-
     public IEnumerable<OrderItem> ReadAllByOrder(int orderId)
     {
-        // שליפת כל הפריטים של הזמנה מסוימת מהקובץ
-        List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-        return items.Where(oi => oi != null && oi.OrderId == orderId).Cast<OrderItem>();
+        return XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML)
+                       .Where(oi => oi != null && oi.OrderId == orderId)
+                       .Cast<OrderItem>();
     }
 
     public OrderItem ReadByProductAndOrder(int orderId, int productId)
     {
-        List<OrderItem?> items = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML);
-        var item = items.FirstOrDefault(oi => oi != null && oi.OrderId == orderId && oi.ProductId == productId);
-        return item ?? throw new IdNotFoundException(orderId, $"OrderItem (Product: {productId})");
+        var item = XMLTools.LoadListFromXMLSerializer<OrderItem>(s_orderItems_XML)
+                           .FirstOrDefault(oi => oi != null && oi.OrderId == orderId && oi.ProductId == productId);
+
+        return item ?? throw new IdNotFoundException($"OrderItem with Order ID {orderId} and Product ID {productId}");
     }
 }

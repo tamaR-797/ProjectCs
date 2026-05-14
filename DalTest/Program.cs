@@ -22,147 +22,93 @@ public class program
         int num = 0;
         do
         {
-            Console.WriteLine("Please choose a type: ");
-            Console.WriteLine("1.  Customer DAL");
-            Console.WriteLine("2.  Product DAL");
-            Console.WriteLine("3.  Sale DAL");
-            Console.WriteLine("4. delete old log");
-            Console.WriteLine("5. Exit");
+            Console.WriteLine("\n--- Main Menu ---");
+            Console.WriteLine("1. Customer DAL");
+            Console.WriteLine("2. Product DAL");
+            Console.WriteLine("3. Sale DAL");
+            Console.WriteLine("4. Order DAL (New!)");     // הוספה
+            Console.WriteLine("5. OrderItem DAL (New!)"); // הוספה
+            Console.WriteLine("6. Delete Old Logs");
+            Console.WriteLine("0. Exit");
 
-            // safer parse
-            var input = Console.ReadLine();
-            if (!int.TryParse(input, out num))
-            {
-                Console.WriteLine("Invalid input. Please enter a number.");
-                continue;
-            }
+            if (!int.TryParse(Console.ReadLine(), out num)) continue;
 
             switch (num)
             {
+                case 1: CRUD(s_dal.Customer, detailsCustomer, "Customer"); break;
+                case 2: CRUD(s_dal.Product, detailsProduct, "Product"); break;
+                case 3: CRUD(s_dal.Sale, detailsSale, "Sale"); break;
+                case 4: CRUD(s_dal.Order, detailsOrder, "Order"); break; // הוספה
+                case 5: CRUDitem(s_dal.OrderItem); break; // טיפול מיוחד בגלל המתודות הנוספות
+                case 6: LogManager.DeleteOldLogs(); break;
+                case 0: Console.WriteLine("Exiting..."); break;
+            }
+        } while (num != 0);
+
+    }
+    // מתודה גנרית לחיסכון בקוד - מטפלת בכל הישויות באותו אופן!
+    private static void CRUD<T>(ICrud<T> dal, Func<int, T> getDetails, string name) where T : class
+    {
+        int choice = showMenu(name);
+        try
+        {
+            switch (choice)
+            {
                 case 1:
-                    CRUDcustomer(s_dal.Customer);
+                    Console.WriteLine($"New ID: {dal.Create(getDetails(0))}");
                     break;
                 case 2:
-                    CRUDproduct(s_dal.Product);
+                    var result = dal.Read(getId());
+                    Console.WriteLine(result?.ToString() ?? "Not Found");
                     break;
                 case 3:
-                    CRUDsale(s_dal.Sale);
+                    dal.Update(getDetails(getId()));
                     break;
                 case 4:
-                    LogManager.DeleteOldLogs();
+                    dal.Delete(getId());
                     break;
                 case 5:
-                    Console.WriteLine("Exiting the program.");
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
+                    var all = dal.ReadAll();
+                    if (all != null)
+                        foreach (var x in all) Console.WriteLine(x);
                     break;
             }
-        } while (num != 5);
+        }
+        catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); }
+    }
+    // מימוש ספציפי ל-OrderItem בגלל המתודות המיוחדות שלו
+    private static void CRUDitem(IOrderItem dal)
+    {
+        int choice = showMenu("OrderItem");
+        if (choice == 5) dal.ReadAll().ForEach(x => Console.WriteLine(x));
+        if (choice == 1) dal.Create(detailsOrderItem(0));
+        // כאן אפשר להוסיף קריאות ל-ReadAllByOrder וכו'
+    }
 
-    }
-    private static void CRUDcustomer(ICrud<Customer> customer)
-    {
-        int num = showMenu();
-        switch (num)
-        {
-            case 1:
-                customer.Create(detailsCustomer());
-                break;
-            case 2:
-                Console.WriteLine(customer.Read(getId()));
-                break;
-            case 3:
-                customer.Update(detailsCustomer(getId()));
-                break;
-            case 4:
-                customer.Delete(getId());
-                break;
-            case 5:
-                foreach (var cust in customer.ReadAll())
-                {
-                    Console.WriteLine(cust);
-                }
-                break;
-            case 6:
-                Console.WriteLine(customer.Read(c => c.CustName == "Tamar"));
-                break;
-            case 7:
-                Console.WriteLine("Returning to main menu.");
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Please try again.");
-                break;
-        }
-    }
-    public static void CRUDproduct(ICrud<Product> product)
-    {
-        int num = showMenu();
-        switch (num)
-        {
-            case 1:
-                product.Create(detailsProduct());
-                break;
-            case 2:
-                Console.WriteLine(product.Read(getId()));
-                break;
-            case 3:
-                product.Update(detailsProduct(getId()));
-                break;
-            case 4:
-                product.Delete(getId());
-                break;
-            case 5:
-                foreach (var prod in product.ReadAll())
-                {
-                    Console.WriteLine(prod);
-                }
-                break;
-            case 6:
-                Console.WriteLine(product.Read(p => p.ProdName == "Puma"));
-                break;
-            case 7:
-                Console.WriteLine("Returning to main menu.");
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Please try again.");
-                break;
-        }
-    }
-    private static void CRUDsale(ICrud<Sale> sale)
-    {
-        int num = showMenu();
-        switch (num)
-        {
-            case 1:
-                sale.Create(detailsSale());
-                break;
-            case 2:
-                Console.WriteLine(sale.Read(getId()));
-                break;
-            case 3:
-                sale.Update(detailsSale(getId()));
-                break;
-            case 4:
-                sale.Delete(getId());
-                break;
-            case 5:
-                foreach (var sal in sale.ReadAll())
-                {
-                    Console.WriteLine(sal);
-                }
-                break;
-            case 6:
-                Console.WriteLine(sale.Read(s => s.SalePrice == 150));
-                break;
-            case 7:
-                Console.WriteLine("Returning to main menu.");
+    // --- עזרי קלט ---
 
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Please try again.");
-                break;
-        }
+    private static Order detailsOrder(int id) {
+        Console.WriteLine("Enter Customer ID for this order:");
+        int custId = int.Parse(Console.ReadLine()!);
+        return new Order { Id = id, CustomerId = custId, OrderDate = DateTime.Now };
+    }
+    private static OrderItem detailsOrderItem(int id)
+    {
+        Console.WriteLine("Enter Order ID and Product ID:");
+        return new OrderItem { OrderId = int.Parse(Console.ReadLine()!), ProductId = int.Parse(Console.ReadLine()!) };
+    }
+
+    private static int getId()
+    {
+        Console.Write("Enter ID: ");
+        return int.Parse(Console.ReadLine()!);
+    }
+
+    private static int showMenu(string entity)
+    {
+        Console.WriteLine($"\n--- {entity} Menu ---");
+        Console.WriteLine("1. Create\n2. Read\n3. Update\n4. Delete\n5. Read All\n6. Back");
+        return int.Parse(Console.ReadLine()!);
     }
     private static Customer detailsCustomer(int id = 0)
     {
@@ -207,41 +153,5 @@ public class program
         DateTime? endDate = string.IsNullOrWhiteSpace(endDateInput) ? DateTime.Now : DateTime.Parse(endDateInput);
         return new Sale(id, productId, quantity, pricePerUnit, isDelivered, startDate, endDate);
     }
-    private static int getId()
-    {
-        Console.WriteLine("Please enter the ID: ");
-        int id;
-        while (!int.TryParse(Console.ReadLine(), out id))
-        {
-            Console.WriteLine("Invalid ID. Please enter a valid integer:");
-        }
-        return id;
-    }
-
-    private static int showMenu()
-    {
-        int num = 0;
-
-        do
-        {
-            Console.WriteLine("Please choose a type: ");
-            Console.WriteLine("1.  Create ");
-            Console.WriteLine("2.  Read ");
-            Console.WriteLine("3.  Update ");
-            Console.WriteLine("4.  Delete ");
-            Console.WriteLine("5.  ReadAll ");
-            Console.WriteLine("6.  Read with filter");
-            Console.WriteLine("7.  Back");
-
-            var input = Console.ReadLine();
-            if (!int.TryParse(input, out num))
-            {
-                Console.WriteLine("Invalid input. Enter number 1-7.");
-                num = 0;
-                continue;
-            }
-        } while (num < 1 || num > 7);
-
-        return num;
-    }
+   
 }
