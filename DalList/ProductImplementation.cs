@@ -6,8 +6,9 @@ using static Dal.DataSource;
 using System.Linq;
 using System.Reflection;
 using Tools;
-
-namespace Dal;
+namespace DalList;
+using BO;
+using BL.BO;
 
 internal class ProductImplementation : IProduct
 {
@@ -52,7 +53,7 @@ internal class ProductImplementation : IProduct
         return product;
     }
 
-    public List<Product?> ReadAll(Func<Product?, bool>? filter = null)
+    public List<Product?> ReadAll(Func<Product?, bool> filter = null)
     {
         LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start readAll");
         if (filter != null)

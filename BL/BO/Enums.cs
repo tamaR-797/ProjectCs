@@ -1,10 +1,8 @@
-﻿namespace BO;
-
-public enum Categories
+﻿
+namespace BO
 {
-    Shirts,
-    Dresses,
-    Pants,
-    Socks,
-    Pajamas
+    public enum Categories
+    {
+        DRESSES, SHIRTS, PANTS, SOCKS, PAJAMS
+    }
 }

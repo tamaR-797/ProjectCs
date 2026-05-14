@@ -1,12 +1,9 @@
-﻿using BO;
-
-namespace BlApi;
-
-public interface ICustomer
+﻿
+using BO;
+namespace BL.BlApi
 {
-    public IEnumerable<Customer?> GetAllCustomers();
-    public Customer GetCustomerDetails(int id);
-    public void AddCustomer(Customer customer);
-    public void UpdateCustomer(Customer customer);
-    public bool IsCustomerExists(int id); // הפונקציה המיוחדת מההנחיות
+     interface ICustomer : ICrud<Customer>
+    {
+       //// bool IsCustomerExist(int id);
+    }
 }

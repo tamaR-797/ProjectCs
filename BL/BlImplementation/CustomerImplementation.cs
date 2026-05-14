@@ -1,46 +1,58 @@
-﻿using BO;
+﻿using DO; // שימוש בשכבת הנתונים בלבד
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace BlImplementation;
-
-internal class CustomerImplementation : BlApi.ICustomer
+namespace Dal
 {
-    private DalApi.IDal _dal = DalApi.Factory.Get;
-
-    public IEnumerable<BO.Customer?> GetAllCustomers()
+    // 1. שינוי שם הממשק ל-ICustomer מה-DAL (ולא מ-BlApi)
+    internal class CustomerImplementation : DalApi.ICustomer
     {
-        return _dal.Customer.ReadAll().Select(doCust => new BO.Customer
-        {
-            CustId = doCust!.CustId,
-            CustName = doCust.CustName,
-            CustAddress = doCust.CustAddress,
-            CustPhone = doCust.CustPhone
-        });
-    }
+        // 2. שימוש מפורש ב-DO.Customer כדי למנוע כפילות עם BO
+        private List<DO.Customer> Load() => XMLTools.LoadListFromXmlSerializer<DO.Customer>("customers");
+        private void Save(List<DO.Customer> list) => XMLTools.SaveListToXmlSerializer(list, "customers");
 
-    public BO.Customer GetCustomerDetails(int id)
-    {
-        try
+        // 3. שינוי החתימה שתקבל ותחזיר DO.Customer
+        public int Create(DO.Customer item)
         {
-            var doCust = _dal.Customer.Read(id)!;
-            return new BO.Customer { CustId = doCust.CustId, CustName = doCust.CustName, CustAddress = doCust.CustAddress, CustPhone = doCust.CustPhone };
+            var customers = Load();
+
+            // שימוש ב-Config של ה-DAL לקבלת מזהה רץ
+            int newId = Config.getStaticValueCustomer;
+
+            // יצירת אובייקט חדש של DO (העתקה עם מזהה חדש)
+            DO.Customer newCust = item with { CustId = newId }; // ודאי שב-DO השדה הוא Id ולא CustId
+
+            customers.Add(newCust);
+            Save(customers);
+            return newId;
         }
-        catch (DalApi.DalDoesNotExistException ex) { throw new Exception("Customer missing", ex); }
-    }
 
-    public void AddCustomer(BO.Customer boCust)
-    {
-        try { _dal.Customer.Create(new DO.Customer(boCust.CustId, boCust.CustName, boCust.CustAddress, boCust.CustPhone)); }
-        catch (DalApi.DalDoesNotExistException ex) { throw new Exception("Customer exists", ex); }
-    }
+        public DO.Customer? Read(int id) => Load().FirstOrDefault(c => c.CustId == id);
 
-    public void UpdateCustomer(Customer customer)
-    {
-        throw new NotImplementedException();
-    }
+        public IEnumerable<DO.Customer?> ReadAll(Func<DO.Customer, bool>? filter = null)
+        {
+            var customers = Load();
+            return filter == null ? customers : customers.Where(filter);
+        }
 
-    public bool IsCustomerExists(int id)
-    {
-        throw new NotImplementedException();
+        public void Update(DO.Customer item)
+        {
+            var customers = Load();
+            // ב-DO השדה המזהה הוא בדרך כלל Id
+            if (customers.RemoveAll(c => c.CustId == item.CustId) == 0)
+                throw new Exception("Customer not found");
+
+            customers.Add(item);
+            Save(customers);
+        }
+
+        public void Delete(int id)
+        {
+            var customers = Load();
+            if (customers.RemoveAll(c => c.CustId == id) == 0)
+                throw new Exception("Customer not found");
+            Save(customers);
+        }
     }
 }

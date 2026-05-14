@@ -1,16 +1,12 @@
-﻿using BlApi;
+﻿using BL.BlApi;
+using BO;
 
-namespace BlImplementation;
+namespace BL.BlImplementation;
 
-internal sealed class Bl : IBl
+internal class Bl: BL.BlApi.IBl
 {
-    private static readonly Lazy<Bl> _instance = new(() => new Bl());
-    public static IBl Instance => _instance.Value;
-
-    private Bl() { }
-
     public IProduct Product => new ProductImplementation();
     public ICustomer Customer => new CustomerImplementation();
     public ISale Sale => new SaleImplementation();
-    public ICart Cart => new CartImplementation();
+    public IOrder Order => new OrderImplementation();
 }

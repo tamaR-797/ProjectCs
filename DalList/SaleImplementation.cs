@@ -7,8 +7,10 @@ using System.Reflection;
 using Tools;
 using System.Collections.Generic;
 using System;
+using BO;
+using BL.BO;
 
-namespace Dal
+namespace DalList
 {
     internal class SaleImplementation : ISale
     {

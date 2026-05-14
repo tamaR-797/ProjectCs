@@ -1,14 +1,19 @@
 ﻿using DO;
 using DalApi;
 using static Dal.DataSource;
-using Tools;
+using tools;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using BO;
+using BL.BO;
+
 
 namespace Dal;
 
-internal class OrderItemImplementation : IOrderItem
+internal class OrderItemImplementation :ProductInOrder
+
 {
     // יצירת פריט הזמנה חדש
     public int Create(OrderItem item)
@@ -19,7 +24,7 @@ internal class OrderItemImplementation : IOrderItem
         // בדרך כלל פריט הזמנה מקבל את ה-ID שלו מה-Config (מספר רץ)
         // אם ב-DO.OrderItem יש שדה Id, נעדכן אותו כאן
         OrderItem finalizedItem = item with { /* Id = Config.OrderItemId */ };
-        DataSource.OrderItems.Add(finalizedItem);
+        DataSource.ProductInOrder.Add(finalizedItem);
 
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, "OrderItem created and added to DataSource.");
@@ -33,7 +38,7 @@ internal class OrderItemImplementation : IOrderItem
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Reading OrderItem with ID: {id}");
 
-        return DataSource.OrderItems.FirstOrDefault(oi => oi?.OrderId == id);
+        return DataSource.ProductInOrder.FirstOrDefault(oi => oi?.OrderId == id);
     }
 
     // קריאה לפי פילטר (פונקציית תנאי)
@@ -42,7 +47,7 @@ internal class OrderItemImplementation : IOrderItem
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, "Reading OrderItem using filter.");
 
-        return DataSource.OrderItems.FirstOrDefault(oi => oi != null && filter(oi));
+        return DataSource.ProductInOrder.FirstOrDefault(oi => oi != null && filter(oi));
     }
 
     // קריאת כל פריטי ההזמנה (עם או בלי פילטר)
@@ -51,7 +56,7 @@ internal class OrderItemImplementation : IOrderItem
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, filter == null ? "Reading all OrderItems." : "Reading OrderItems with filter.");
 
-        return DataSource.OrderItems
+        return DataSource.ProductInOrder
             .Where(oi => oi != null && (filter == null || filter(oi)))
             .Select(oi => oi == null ? null : new OrderItem
             {
@@ -68,7 +73,7 @@ internal class OrderItemImplementation : IOrderItem
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Updating OrderItem for Order {item.OrderId}, Product {item.ProductId}");
 
-        var oldItem = DataSource.OrderItems.FirstOrDefault(oi => oi?.OrderId == item.OrderId && oi?.ProductId == item.ProductId);
+        var oldItem = DataSource.ProductInOrder.FirstOrDefault(oi => oi?.OrderId == item.OrderId && oi?.ProductId == item.ProductId);
 
         if (oldItem == null)
         {
@@ -77,8 +82,8 @@ internal class OrderItemImplementation : IOrderItem
             throw new IdNotFoundException(item.OrderId, "OrderItem");
         }
 
-        int index = DataSource.OrderItems.IndexOf(oldItem);
-        DataSource.OrderItems[index] = item;
+        int index = DataSource.ProductInOrder.IndexOf(oldItem);
+        DataSource.ProductInOrder[index] = item;
     }
 
     // מחיקת פריט/ים לפי מזהה הזמנה
@@ -87,8 +92,8 @@ internal class OrderItemImplementation : IOrderItem
         LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Deleting all items for Order ID: {id}");
 
-        int removedCount = DataSource.OrderItems.RemoveAll(oi => oi?.OrderId == id);
-
+        int removedCount = DataSource.ProductInOrder.RemoveAll(oi => oi?.OrderId == id);
+        
         if (removedCount == 0)
         {
             LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
@@ -99,11 +104,11 @@ internal class OrderItemImplementation : IOrderItem
     // מתודות ספציפיות מהממשק IOrderItem
     public IEnumerable<OrderItem> ReadAllByOrder(int orderId)
     {
-        return DataSource.OrderItems.Where(oi => oi != null && oi.OrderId == orderId)!;
+        return DataSource.ProductInOrder.Where(oi => oi != null && oi.OrderId == orderId)!;
     }
 
     public OrderItem ReadByProductAndOrder(int orderId, int productId)
     {
-        return DataSource.OrderItems.FirstOrDefault(oi => oi != null && oi.OrderId == orderId && oi.ProductId == productId)!;
+        return DataSource.ProductInOrder.FirstOrDefault(oi => oi != null && oi.OrderId == orderId && oi.ProductId == productId)!;
     }
 }

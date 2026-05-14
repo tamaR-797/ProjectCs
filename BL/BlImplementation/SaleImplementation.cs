@@ -1,33 +1,55 @@
-﻿using BO;
-using System.Linq;
+﻿//using DO;
+using DalApi;
+using BO;
 
-namespace BlImplementation;
 
-internal class SaleImplementation : BlApi.ISale
-{
-    private DalApi.IDal _dal = DalApi.Factory.Get;
+namespace Dal;
 
-    public IEnumerable<BO.SaleForList> GetSalesList()
+    internal class SaleImplementation : ISale
     {
-        return from DO.Order doOrd in _dal.Order.ReadAll()
-               let orderItems = _dal.OrderItem.ReadAll(oi => oi?.OrderId == doOrd.Id)
-               select new BO.SaleForList
-               {
-                   OrderId = doOrd.OrderId,
-                   CustomerName = _dal.Customer.Read(doOrd.CustomerId)?.CustName ?? "Unknown",
-                   AmountOfItems = orderItems.Count(),
-                   TotalPrice = orderItems.Sum(oi => (oi?.PricePerUnit ?? 0) * (oi?.Quantity ?? 0))
-               };
-    }
+        // פונקציות עזר לטעינה ושמירה מהירה
+        private List<Sale> Load() => XMLTools.LoadListFromXmlSerializer<Sale>("sales");
+        private void Save(List<Sale> list) => XMLTools.SaveListToXmlSerializer(list, "sales");
 
-    public BO.Sale GetSaleDetails(int id) => throw new NotImplementedException();
-    public BO.Sale UpdateOrderShipping(int id) => throw new NotImplementedException();
-    public BO.Sale UpdateOrderDelivery(int id) => throw new NotImplementedException();
+        public int Create(Sale item)
+        {
+            var sales = Load();
 
-    // מימושים ריקים עבור שאר פונקציות הממשק
-    public IEnumerable<Sale?> GetAllSales() => throw new NotImplementedException();
-    public void AddSale(Sale sale) => throw new NotImplementedException();
-    public void UpdateSale(Sale sale) => throw new NotImplementedException();
-    public void DeleteSale(int id) => throw new NotImplementedException();
-    public IEnumerable<Sale?> GetActiveSalesByProduct(int productId) => throw new NotImplementedException();
+            // קבלת מספר רץ מהקונפיגורציה שיצרתן
+            int nextId = Config.getStaticValueSale;
+
+            // יצירת מופע חדש עם ה-ID שקיבלנו
+            Sale newSale = item with { SaleId = nextId };
+
+            sales.Add(newSale);
+            Save(sales);
+            return nextId;
+        }
+
+        public Sale? Read(int id) => Load().FirstOrDefault(s => s.SaleId == id);
+
+        public IEnumerable<Sale?> ReadAll(Func<Sale, bool>? filter = null)
+        {
+            var sales = Load();
+            return filter == null ? sales : sales.Where(filter);
+        }
+
+        public void Update(Sale item)
+        {
+            var sales = Load();
+            // מחיקת הישן והוספת החדש (כי זה record)
+            if (sales.RemoveAll(s => s.SaleId == item.SaleId) == 0)
+                throw new Exception("Sale not found");
+
+            sales.Add(item);
+            Save(sales);
+        }
+
+        public void Delete(int id)
+        {
+            var sales = Load();
+            if (sales.RemoveAll(s => s.SaleId == id) == 0)
+                throw new Exception("Sale not found");
+            Save(sales);
+        }
 }

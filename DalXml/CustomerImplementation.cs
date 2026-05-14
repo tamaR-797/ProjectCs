@@ -1,64 +1,47 @@
 ﻿using DalApi;
-using DalXml;
 using DO;
-using Tools;
-using System;
 
-namespace Dal
+namespace Dal;
+
+internal class CustomerImplementation : ICustomer
 {
-    internal class CustomerImplementation : ICustomer
+    private readonly string s_xml_file = "Customers";
+
+    public int Create(Customer item)
     {
-        private List<Customer> Load() => XMLTools.LoadListFromXmlSerializer<Customer>("customers");
-        private void Save(List<Customer> list) => XMLTools.SaveListToXmlSerializer(list, "customers");
-
-        public int Create(Customer item)
-        {
-            var customers = Load();
-
-            // שימוש ב-Config שיצרתן כדי לקבל ID רץ
-            int newId = Config.getStaticValueCustomer;
-
-            // יצירת אובייקט חדש עם ה-ID המעודכן
-            Customer newCust = item with { CustId = newId };
-
-            customers.Add(newCust);
-            Save(customers);
-            return newId;
-        }
-
-        public Customer? Read(int id) => Load().FirstOrDefault(c => c.CustId == id);
-
-        public IEnumerable<Customer?> ReadAll(Func<Customer, bool>? filter = null)
-        {
-            var customers = Load();
-            return filter == null ? customers : customers.Where(filter);
-        }
-
-        public void Update(Customer item)
-        {
-            var customers = Load();
-            if (customers.RemoveAll(c => c.CustId == item.CustId) == 0)
-                throw new Exception("Customer not found");
-
-            customers.Add(item);
-            Save(customers);
-        }
-
-        public void Delete(int id)
-        {
-            var customers = Load();
-            if (customers.RemoveAll(c => c.CustId == id) == 0)
-                throw new Exception("Customer not found");
-            Save(customers);
-        }
-
-        public Customer? Read(Func<Customer, bool> filter)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<Customer?> ICrud<Customer>.ReadAll(Func<Customer?, bool>? filter)
-        {
-            throw new NotImplementedException();
-        }
+        var list = XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file);
+        int nextId = Config.NextCustomerId;
+        var newItem = item with { CustId = nextId };
+        list.Add(newItem);
+        XMLTools.SaveListToXMLSerializer(list, s_xml_file);
+        return nextId;
     }
+
+    public Customer? Read(int id) =>
+        XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file).FirstOrDefault(c => c?.CustId == id);
+
+    public Customer? Read(Func<Customer, bool> filter) =>
+        XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file).FirstOrDefault(c => c != null && filter(c));
+
+    public List<Customer?> ReadAll(Func<Customer?, bool>? filter = null)
+    {
+        var list = XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file);
+        return filter == null ? list : list.Where(filter).ToList();
+    }
+
+    public void Update(Customer item)
+    {
+        var list = XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file);
+        int index = list.FindIndex(c => c?.CustId == item.CustId);
+        if (index == -1) throw new IdNotFoundException(item.CustId.ToString());
+        list[index] = item;
+        XMLTools.SaveListToXMLSerializer(list, s_xml_file);
+    }
+
+    public void Delete(int id)
+    {
+        var list = XMLTools.LoadListFromXMLSerializer<Customer>(s_xml_file);
+        if (list.RemoveAll(c => c?.CustId == id) == 0) throw new IdNotFoundException(id.ToString());
+        XMLTools.SaveListToXMLSerializer(list, s_xml_file);
+    }
+}

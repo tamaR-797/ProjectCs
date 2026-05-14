@@ -142,32 +142,7 @@ namespace BO
 
                 );
         }
-        public static string ToStringProperty<T>(this T obj)
-        {
-            if (obj == null) return "";
-
-            string str = "";
-            // מעבר על כל ה-Properties של האובייקט בזמן ריצה
-            foreach (PropertyInfo prop in obj.GetType().GetProperties())
-            {
-                var value = prop.GetValue(obj, null);
-
-                // טיפול במקרה של אוסף (List/Enumerable) בתוך הישות
-                if (value is IEnumerable enumerable && !(value is string))
-                {
-                    str += $"{prop.Name}: [";
-                    foreach (var item in enumerable)
-                        str += $"\n  {item}";
-                    str += "]\n";
-                }
-                else
-                {
-                    str += $"{prop.Name}: {value}\n";
-                }
-            }
-            return str;
-        }
     }
-    }              
+}              
                 
                 

@@ -5,6 +5,8 @@ using static Dal.DataSource;
 using System.Linq;
 using System.Reflection;
 using Tools;
+using BO;
+using BL.BO;
 
 namespace Dal
 {
@@ -52,7 +54,7 @@ namespace Dal
         }
 
 
-        public List<Customer?> ReadAll(Func<Customer?, bool>? filter = null)
+        public List<Customer?> ReadAll(Func<Customer?, bool> filter = null)
         {
             LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start readAll");
             if (filter != null)
@@ -64,9 +66,22 @@ namespace Dal
                 return list.ToList();
             }
             LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish readAllNull");
-            return customers.ToList();
+            return customers;
         }
+        //public List<Customer?> ReadAll(Func<Customer?, bool> filter = null)
+        //{
+        //    if (filter != null)
+        //    {
+        //        var list =
+        //             from c in customers
+        //             where filter(c)
+        //             select c;
+                     
+        //        return list.ToList();
+        //    }
+        //   return customers.ToList();
 
+        //}
         
         public void Update(Customer item)
         {
@@ -94,7 +109,7 @@ namespace Dal
         public void Delete(int id)
         {
             LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start delete");
-        
+            // Find the customer with the read given id
             var customer = customers.FirstOrDefault(c => id == c?.CustId);
             if (customer != null)
             {

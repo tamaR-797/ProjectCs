@@ -1,9 +1,18 @@
-﻿namespace BlApi;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DalApi;
+using BO;
 
-public interface IBl
+namespace BL.BlApi
 {
-    public IProduct Product { get; }
-    public ICustomer Customer { get; }
-    public ISale Sale { get; }
-    public ICart Cart { get; }
+    public class IBl
+    {
+        IProduct Product { get; }
+        ICustomer Customer { get; }
+        ISale Sale { get; }
+        IOrder Order { get; }
+    }
 }

@@ -1,8 +1,10 @@
 ﻿using DO;
+using System.Collections.Generic;
 
 namespace DalApi;
 
 public interface IOrderItem : ICrud<OrderItem>
 {
-    // ניתן להוסיף כאן מתודות ספציפיות לפריטי הזמנה
+    IEnumerable<OrderItem> ReadAllByOrder(int orderId);
+    OrderItem ReadByProductAndOrder(int orderId, int productId);
 }
