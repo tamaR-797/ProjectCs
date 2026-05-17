@@ -1,6 +1,9 @@
 ﻿using BL.BlApi;
 using BO;
-
+using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BL.BlImplementation;
 
@@ -10,88 +13,65 @@ internal class OrderImplementation : IOrder
 
     public int DoOrder(Order order)
     {
-        // 1. בדיקות תקינות קלט בסיסיות (Validation)
-        if (order == null)
-            throw new BLNullPropertyException("Order", "Object");
+        if (order == null) throw new Exception("Order cannot be null");
+        if (order.Items == null || !order.Items.Any()) throw new Exception("Cannot place an empty order.");
 
-        if (order.Items == null || !order.Items.Any())
-            throw new BLInvalidInputException("Cannot place an empty order. Please add products to your cart.");
-
-        // 2. בדיקת מלאי וקיום מוצרים
+        // בדיקת מלאי וקיום מוצרים מול ה-DAL
         foreach (var item in order.Items)
         {
             var doProduct = _dal.Product.Read(item.ProductId);
+            if (doProduct == null) throw new Exception($"Product {item.ProductId} not found");
 
-            if (doProduct == null)
-                throw new BLIdNotFoundException(item.ProductId, "Product");
-
-            if (doProduct.Quantity < item.Quantity)
+            if ((doProduct.QuantityInStock ?? 0) < item.Quantity)
             {
-                throw new BLOutOfStockException(item.ProductId, doProduct.Name);
+                throw new Exception($"Out of stock for product: {doProduct.ProdName}");
             }
         }
 
-        // 3. בדיקת קיום לקוח וחישוב מחירים
         var customer = _dal.Customer.Read(order.CustomerId);
-        if (customer == null)
-        {
-            throw new BLIdNotFoundException(order.CustomerId, "Customer");
-        }
+        if (customer == null) throw new Exception($"Customer {order.CustomerId} not found");
 
-        bool isClubMember = customer.IsClubMember;
         double totalOrderPrice = 0;
-
         foreach (var item in order.Items)
         {
-            // בתוך CalculateItemPrice כבר קיימת חריגה אם המוצר לא נמצא
-            double itemTotalPrice = CalculateItemPrice(item.ProductId, item.Quantity, isClubMember);
-
+            // שליחת false כברירת מחדל לחבר מועדון, או שימוש בנתון האמיתי מהלקוח (למשל customer.IsClub)
+            double itemTotalPrice = CalculateItemPrice(item.ProductId, item.Quantity, false);
             item.PricePerUnit = itemTotalPrice / item.Quantity;
             totalOrderPrice += itemTotalPrice;
         }
 
-        if (totalOrderPrice <= 0)
-            throw new BLDataValidationException("Order", "TotalPrice", "must be greater than zero");
-
         order.TotalPrice = totalOrderPrice;
         order.OrderDate = DateTime.Now;
 
-        // 4. תהליך השמירה ב-DAL
-        try
+        // 1. יצירת ההזמנה הראשית ב-DAL (שימוש מפורש ב-DO.Order)
+        int newOrderId = _dal.Order.Create(new DO.Order
         {
-            // שמירת ההזמנה הראשית
-            int newOrderId = _dal.Order.Create(Tools.ToDo(order));
+            CustId = order.CustomerId,
+            OrderDate = order.OrderDate,
+            ShipDate = null,
+            DeliveryDate = null
+        });
 
-            // שמירת פריטי ההזמנה ועדכון המלאי
-            foreach (var item in order.Items)
+        // 2. יצירת פריטי ההזמנה ב-DAL ועדכון המלאי
+        foreach (var item in order.Items)
+        {
+            _dal.OrderItem.Create(new DO.OrderItem
             {
-                // שמירת פריט ההזמנה (מקושר ל-ID שנוצר)
-                _dal.OrderItem.Create(item.ToDo(newOrderId));
+                OrderId = newOrderId,
+                ProdId = item.ProductId,
+                QuantityItem = item.Quantity,
+                PriceItem = item.PricePerUnit
+            });
 
-                // עדכון המלאי ב-DAL
-                var doProduct = _dal.Product.Read(item.ProductId);
-                if (doProduct != null)
-                {
-                    _dal.Product.Update(doProduct with { Quantity = doProduct.Quantity - item.Quantity });
-                }
+            // עדכון המלאי בקובץ הנתונים
+            var doProduct = _dal.Product.Read(item.ProductId);
+            if (doProduct != null)
+            {
+                _dal.Product.Update(doProduct with { QuantityInStock = (doProduct.QuantityInStock ?? 0) - item.Quantity });
             }
+        }
 
-            return newOrderId;
-        }
-        catch (DO.AlreadyExistsIdException ex)
-        {
-            // המרה של חריגת DAL לחריגת BL תואמת
-            throw new BLAlreadyExistsException(order.Id, "Order", ex);
-        }
-        catch (DO.IdNotFoundException ex)
-        {
-            throw new BLIdNotFoundException(order.Id, "Order", ex);
-        }
-        catch (Exception ex)
-        {
-            // עטיפת שגיאות לא צפויות (כמו בעיות ב-XML) בשגיאת תהליך כללית
-            throw new BLOrderProcessException("An error occurred while saving the order to the database. Please try again.", ex);
-        }
+        return newOrderId;
     }
 
     public double CalculateItemPrice(int productId, int quantity, bool isClubMember)
@@ -99,19 +79,19 @@ internal class OrderImplementation : IOrder
         var doProduct = _dal.Product.Read(productId);
         if (doProduct == null) return 0;
 
-        double basePrice = doProduct.Price * quantity;
+        double basePrice = (doProduct.ProdPrice ?? 0) * quantity;
 
-        // חיפוש מבצע פעיל
+        // חישוב המבצעים הפעילים מה-DAL
         var activeSale = (from s in _dal.Sale.ReadAll()
                           where s != null &&
-                                s.ProductId == productId &&
-                                s.SaleStartDate <= DateTime.Now &&
-                                s.SaleEndDate >= DateTime.Now &&
-                                (!s.IsForClubMembers || isClubMember) &&
-                                quantity >= s.RequiredQuantity
+                                s.ProdId == productId &&
+                                s.StartDate <= DateTime.Now &&
+                                s.EndDate >= DateTime.Now &&
+                                (!s.IsClub || isClubMember) &&
+                                quantity >= (s.QuantitySale ?? 0)
                           select s).FirstOrDefault();
 
-        return activeSale != null ? activeSale.DiscountedPrice * quantity : basePrice;
+        return activeSale != null ? (activeSale.SalePrice ?? 0) * quantity : basePrice;
     }
 
     public double GetTotalOrderSum(List<OrderItem> items, bool isClubMember)
@@ -123,25 +103,10 @@ internal class OrderImplementation : IOrder
     {
         return items.All(item => {
             var p = _dal.Product.Read(item.ProductId);
-            return p != null && p.Quantity >= item.Quantity;
+            return p != null && (p.QuantityInStock ?? 0) >= item.Quantity;
         });
     }
 
-    public List<Order> ReadAllOrders(Func<Order, bool>? filter = null)
-    {
-        return (from doOrd in _dal.Order.ReadAll()
-                let boOrd = Tools.ToBo(doOrd, _dal.OrderItem.ReadAllByOrder(doOrd.Id))
-                where filter == null || filter(boOrd)
-                select boOrd).ToList();
-    }
-
-    public Order? GetOrderDetails(int orderId)
-    {
-        var doOrder = _dal.Order.Read(orderId);
-        if (doOrder == null) return null;
-
-        // שליפת הפריטים השייכים להזמנה כדי להחזיר אובייקט BO שלם
-        var items = _dal.OrderItem.ReadAllByOrder(orderId);
-        return Tools.ToBo(doOrder, items);
-    }
+    public List<Order> ReadAllOrders(Func<Order, bool>? filter = null) => throw new NotImplementedException();
+    public Order? GetOrderDetails(int orderId) => throw new NotImplementedException();
 }

@@ -1,13 +1,9 @@
 ﻿using DO;
 using DalApi;
 using static Dal.DataSource;
-using tools;
+using Tools;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using BO;
-using BL.BO;
+
 
 
 namespace Dal;
@@ -18,7 +14,7 @@ internal class OrderItemImplementation :ProductInOrder
     // יצירת פריט הזמנה חדש
     public int Create(OrderItem item)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Attempting to add product {item.ProductId} to order {item.OrderId}");
 
         // בדרך כלל פריט הזמנה מקבל את ה-ID שלו מה-Config (מספר רץ)
@@ -26,7 +22,7 @@ internal class OrderItemImplementation :ProductInOrder
         OrderItem finalizedItem = item with { /* Id = Config.OrderItemId */ };
         DataSource.ProductInOrder.Add(finalizedItem);
 
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, "OrderItem created and added to DataSource.");
 
         return finalizedItem.OrderId;
@@ -35,7 +31,7 @@ internal class OrderItemImplementation :ProductInOrder
     // קריאת פריט לפי מזהה
     public OrderItem? Read(int id)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Reading OrderItem with ID: {id}");
 
         return DataSource.ProductInOrder.FirstOrDefault(oi => oi?.OrderId == id);
@@ -44,7 +40,7 @@ internal class OrderItemImplementation :ProductInOrder
     // קריאה לפי פילטר (פונקציית תנאי)
     public OrderItem? Read(Func<OrderItem, bool> filter)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, "Reading OrderItem using filter.");
 
         return DataSource.ProductInOrder.FirstOrDefault(oi => oi != null && filter(oi));
@@ -53,7 +49,7 @@ internal class OrderItemImplementation :ProductInOrder
     // קריאת כל פריטי ההזמנה (עם או בלי פילטר)
     public List<OrderItem?> ReadAll(Func<OrderItem, bool>? filter = null)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, filter == null ? "Reading all OrderItems." : "Reading OrderItems with filter.");
 
         return DataSource.ProductInOrder
@@ -70,14 +66,14 @@ internal class OrderItemImplementation :ProductInOrder
     // עדכון פריט קיים
     public void Update(OrderItem item)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Updating OrderItem for Order {item.OrderId}, Product {item.ProductId}");
 
         var oldItem = DataSource.ProductInOrder.FirstOrDefault(oi => oi?.OrderId == item.OrderId && oi?.ProductId == item.ProductId);
 
         if (oldItem == null)
         {
-            LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
                 MethodBase.GetCurrentMethod().Name, "Error: OrderItem not found for update.");
             throw new IdNotFoundException(item.OrderId, "OrderItem");
         }
@@ -89,14 +85,14 @@ internal class OrderItemImplementation :ProductInOrder
     // מחיקת פריט/ים לפי מזהה הזמנה
     public void Delete(int id)
     {
-        LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
             MethodBase.GetCurrentMethod().Name, $"Deleting all items for Order ID: {id}");
 
         int removedCount = DataSource.ProductInOrder.RemoveAll(oi => oi?.OrderId == id);
         
         if (removedCount == 0)
         {
-            LogManager.Log(MethodBase.GetCurrentMethod().DeclaringType.FullName,
+            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName,
                 MethodBase.GetCurrentMethod().Name, "Warning: No items were found to delete.");
         }
     }

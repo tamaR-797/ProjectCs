@@ -1,14 +1,10 @@
 ﻿using DalApi;
 using DO;
-using Dal;
 using static Dal.DataSource;
-using System.Linq;
 using System.Reflection;
 using Tools;
-using System.Collections.Generic;
-using System;
-using BO;
-using BL.BO;
+
+
 
 namespace DalList
 {

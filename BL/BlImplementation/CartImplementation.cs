@@ -1,24 +1,28 @@
-﻿using System.Linq; // חובה בשביל ה-FirstOrDefault וה-Sum
-using System.Collections.Generic;
+﻿using BlApi; // הממשקים של ה-BL
 using BO;
-using BlApi;
+using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace BlImplementation;
+namespace BL.BlImplementation;
 
-internal class CartImplementation : BlApi.ICart
+internal class CartImplementation : ICart
 {
     private DalApi.IDal _dal = DalApi.Factory.Get;
 
-    public BO.Cart AddProductToCart(BO.Cart cart, int id)
+    public Cart AddProductToCart(Cart cart, int productId)
     {
-        // קבלת נתוני המוצר מה-DAL
-        DO.Product p = _dal.Product.Read(id) ?? throw new Exception("Product not found");
+        if (cart == null) throw new ArgumentNullException(nameof(cart));
 
-        // בדיקה אם יש מלאי
+        // שליפת המוצר מה-DAL (ישויות DO)
+        DO.Product p = _dal.Product.Read(productId) ?? throw new Exception("Product not found");
+
         if (p.QuantityInStock <= 0) throw new Exception("Out of stock");
 
-        // בדיקה אם המוצר כבר קיים בסל
-        var item = cart.Items?.FirstOrDefault(i => i.ProdId == id);
+        cart.Items ??= new List<ItemInCart>();
+        var itemsList = cart.Items.ToList();
+        var item = itemsList.FirstOrDefault(i => i.ProdId == productId);
 
         if (item != null)
         {
@@ -27,47 +31,77 @@ internal class CartImplementation : BlApi.ICart
         }
         else
         {
-            // אם המוצר לא בסל, מוסיפים אותו כחדש
-            var newList = cart.Items?.ToList() ?? new List<BO.ItemInCart>();
-            newList.Add(new BO.ItemInCart
+            itemsList.Add(new ItemInCart
             {
-                ProdId = id,
+                ProdId = productId,
                 ProdName = p.ProdName,
                 Price = p.ProdPrice ?? 0,
                 Quantity = 1,
                 TotalPrice = p.ProdPrice ?? 0
             });
-            cart.Items = newList;
         }
 
-        // עדכון המחיר הכולל של הסל
+        cart.Items = itemsList;
         cart.FinalPrice = cart.Items.Sum(i => i.TotalPrice);
         return cart;
     }
 
-    public BO.Cart UpdateProductQuantity(BO.Cart cart, int id, int quantity) => throw new NotImplementedException();
-
-    public int ConfirmOrder(BO.Cart cart)
+    public Cart UpdateQuantity(Cart cart, int productId, int newQuantity)
     {
-        // לוגיקה לבדיקת מלאי סופית
-        foreach (var item in cart.Items!)
+        if (cart == null) throw new ArgumentNullException(nameof(cart));
+        if (cart.Items == null) return cart;
+
+        var itemsList = cart.Items.ToList();
+        var item = itemsList.FirstOrDefault(i => i.ProdId == productId);
+
+        if (item != null)
+        {
+            if (newQuantity <= 0)
+            {
+                itemsList.Remove(item);
+            }
+            else
+            {
+                DO.Product p = _dal.Product.Read(productId) ?? throw new Exception("Product not found");
+                if (p.QuantityInStock < newQuantity) throw new Exception("Not enough stock");
+
+                item.Quantity = newQuantity;
+                item.TotalPrice = item.Quantity * item.Price;
+            }
+
+            cart.Items = itemsList;
+            cart.FinalPrice = cart.Items.Sum(i => i.TotalPrice);
+        }
+
+        return cart;
+    }
+
+    public void ConfirmOrder(Cart cart)
+    {
+        if (cart == null) throw new ArgumentNullException(nameof(cart));
+        if (cart.Items == null || !cart.Items.Any()) throw new Exception("Cart is empty");
+
+        foreach (var item in cart.Items)
         {
             var p = _dal.Product.Read(item.ProdId);
-            if (p?.QuantityInStock < item.Quantity)
+            if (p == null) throw new Exception($"Product {item.ProdId} not found");
+            if (p.QuantityInStock < item.Quantity)
                 throw new Exception($"Not enough stock for {item.ProdName}");
         }
 
-        // כאן יבוא בהמשך הקוד ליצירת ההזמנה ב-DAL
-        return 0;
-    }
+        // יצירת אובייקט הזמנה לוגי ושליחתו למימוש של ה-Order
+        Order newOrder = new Order
+        {
+            CustomerId = 1, // זמני לפי דרישות הבדיקה
+            Items = cart.Items.Select(i => new OrderItem
+            {
+                ProductId = i.ProdId,
+                Quantity = i.Quantity
+            }).ToList()
+        };
 
-    public Cart UpdateQuantity(Cart cart, int productId, int newQuantity)
-    {
-        throw new NotImplementedException();
-    }
-
-    void ICart.ConfirmOrder(Cart cart)
-    {
-        throw new NotImplementedException();
+        // קריאה ישירה למימוש ה-Order בשביל לבצע את ההזמנה בפועל ב-DAL ולעדכן מלאי
+        BL.BlApi.IOrder orderLogic = new OrderImplementation();
+        orderLogic.DoOrder(newOrder);
     }
 }
