@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DalApi;
-using BO;
+﻿using DalApi;
+using System.Security.Cryptography.X509Certificates;
 
-namespace BL.BlApi
+namespace BlApi
 {
-    public class IBl
+    public interface IBl
     {
-        IProduct Product { get; }
-        ICustomer Customer { get; }
-        ISale Sale { get; }
-        IOrder Order { get; }
+        public ISale ISale { get; }
+
+        public IProduct IProduct { get; }
+
+        public IClient IClient { get; }
+
+        public IOrder IOrder { get; }
+
     }
 }

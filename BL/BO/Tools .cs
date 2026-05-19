@@ -1,148 +1,126 @@
-﻿using DO;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BO
 {
     internal static class Tools
     {
-        public static string ToStringProperty<T>(this T obj, string prefix = "")
+        public static string ToStringProperty<T>(this T obj)
         {
-            StringBuilder sb = new StringBuilder();
-            var properties = typeof(T)?.GetProperties();
-            if (properties == null) throw new Exception("OBJECT IS NULL");
-            foreach (var prop in properties)
+            // 1. תנאי עצירה למקרה שאין ערך
+            if (obj == null) return "null";
+
+            // 2. טיפול באוספים (רשימות/מערכים) - נכנסים לעומק הרשימה
+            if (obj is IEnumerable enumerable && obj is not string)
             {
-                if (prop.PropertyType.IsPrimitive || prop.PropertyType == typeof(string) || prop.PropertyType == typeof(DateTime))
-                {
-                    var value = prop.GetValue(obj);
-                    sb.AppendLine($"{prefix}{prop.Name}: {value}");
-                }
-                else
-                {
-                    Console.WriteLine($"{prefix}{prop.Name}:");
-                    sb.AppendLine(prop.Name);
-                }
+                var items = enumerable.Cast<object>().Select(item => item.ToStringProperty());
+                return $"[{string.Join(", ", items)}]";
             }
 
-            return sb.ToString();
-        }
-        public static string ToStringProperty<T>(this T t)
-        {
-            string str = "";
-            Type type = t.GetType();
-            PropertyInfo[] properties = type.GetProperties();
-            foreach (PropertyInfo property in properties)
-            {
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType) && property.PropertyType != typeof(string))
-                {
-                    str += $"{property.Name}:\n";
-                    IEnumerable enumerable = property.GetValue(t) as IEnumerable;
-                    if (enumerable != null)
-                    {
-                        foreach (var item in enumerable)
-                        {
-                            str += item.ToStringProperty();
-                        }
-                    }
+            Type type = obj.GetType();
 
-                }
-                else
-                    str += $"{property.Name}: {property.GetValue(t)}\n";
-            }
-            return str;
-        }
-        public static DO.Product ConvertToDO(this BO.Product p)
-        {
-            return new DO.Product
+            // 3. טיפול בסוגים בסיסיים (מספרים, בוליאני, מחרוזות)
+            if (type.IsPrimitive || type.IsValueType || type == typeof(string))
             {
-                ProdId = p.ProdId,
-                ProdName = p.ProdName,
-                category = (DO.Categories)Enum.Parse(typeof(DO.Categories), p.Category.ToString()),
-                ProdPrice = p.ProdPrice,
-                QuantityInStock = p.QuantityInStock
+                return type == typeof(string) ? $"\"{obj}\"" : obj.ToString();
+            }
+
+            // 4. חקירת האובייקט (Reflection) - שליפת כל התכונות הציבוריות
+            var properties = type.GetProperties();
+
+            // 5. הרכבת המחרוזת: שם התכונה והערך שלה
+            var propStrings = properties.Select(prop =>
+            {
+                object value = prop.GetValue(obj);
+                // קריאה חוזרת למתודה כדי לטפל במקרה שהערך הוא בעצמו אובייקט מורכב או רשימה
+                string valueString = value.ToStringProperty();
+                return $"{prop.Name}: {valueString}";
+            });
+
+            // עטיפת התוצאה בסוגריים מסולסלים כדי להראות שזה אובייקט
+            return $"{{ {string.Join(", ", propStrings)} }}";
+        }
+
+        public static BO.Client convert(this DO.Customer customer)
+        {
+            return new BO.Client
+            {
+                Id = customer.id,
+                Name = customer.customer_name,
+                Address = customer.customer_adress,
+                Phone = customer.customer_phon,
+                IsClubMember = customer.isClubMember
             };
         }
-        public static BO.Product ConvertToBO(this DO.Product p)
+
+        public static BO.Product convert(this DO.Product product)
         {
             return new BO.Product
-            (
-                ProdId: p.ProdId,
-                ProdName: p.ProdName,
-                category: (BO.Categories?)Enum.Parse(typeof(BO.Categories), p.category.ToString()),
-                ProdPrice: p.ProdPrice ?? 0,
-                QuantityInStock: p.QuantityInStock ?? 0
-            );
+            {
+                Id = product.id,
+                Name = product.product_name,
+                category = (Categories)product.category,
+                Price = product.price,
+                Stock = product.amount_in_stock,
+
+            };
         }
-        public static DO.Customer ConvertToDO(this BO.Customer c)
+
+        public static BO.Sale convert(this DO.Sale sale)
+        {
+            return new BO.Sale
+            {
+                Id = sale.id,
+                ProductId = sale.product_id,
+                amount_to_sale = sale.amount_to_sale,
+                cost_per_one = sale.count_to_sale,
+                to_club = sale.to_club,
+                start_date = sale.start_date,
+                end_date = sale.end_date
+
+            };
+        }
+
+        public static DO.Customer convert(this BO.Client client)
         {
             return new DO.Customer
             {
-                CustId = c.CustId,
-                CustName = c.CustName,
-                CustPhone = c.CustPhone,
-                CustAddress = c.CustAddress
+                id = client.Id,
+                customer_name = client.Name,
+                customer_adress = client.Address,
+                customer_phon = client.Phone,
+                isClubMember = client.IsClubMember
             };
         }
-        public static BO.Customer ConvertToBO(this DO.Customer c)
+
+        public static DO.Product convert(this BO.Product product)
         {
-            return new BO.Customer
-            (
-                CustId: c.CustId,
-                CustName: c.CustName,
-                CustPhone: c.CustPhone,
-                CustAddress: c.CustAddress
-            );
+            return new DO.Product
+            {
+                id = product.Id,
+                product_name = product.Name,
+                category = (DO.Categories)product.category,
+                price = product.Price,
+                amount_in_stock = product.Stock
+            };
         }
-        public static DO.Sale ConvertToDO(this BO.Sale s)
+        public static DO.Sale convert(this BO.Sale sale)
         {
             return new DO.Sale
             {
-                SaleId = s.SaleId,
-                ProdId = s.ProdId,
-                QuantitySale = s.QuantitySale,
-                SalePrice = s.SalePrice,
-                IsClub = s.IsClub,
-                StartDate = s.StartDate,
-                EndDate = s.EndDate
+                id = sale.Id,
+                product_id = sale.ProductId,
+                amount_to_sale = sale.amount_to_sale,
+                count_to_sale = sale.cost_per_one,
+                to_club = sale.to_club,
+                start_date = sale.start_date,
+                end_date = sale.end_date
             };
         }
-        public static BO.Sale ConvertToBO(this DO.Sale s)
-        {
-            return new BO.Sale
-            (
-                SaleId: s.SaleId,
-                ProdId: s.ProdId,
-                QuantitySale: s.QuantitySale ?? 0,
-                SalePrice: s.SalePrice ?? 0,
-                IsClub: s.IsClub ?? false,
-                StartDate: s.StartDate ?? DateTime.Now,
-                EndDate: s.EndDate ?? DateTime.Now.AddDays(7)
-            );
-        }
-        public static BO.SaleInProduct ConvertSaleToSaleInProduct(this DO.Sale s)
-        {
-            return new BO.SaleInProduct
-            (
-                ProdId: s.ProdId,
-                QuantityInSale: s.QuantitySale ?? 0,
-                Price: s.SalePrice ?? 0,
-               ForClub: s.IsClub ?? false
-            );
-        }
-        public static BO.ProductInOrder ConvertSaleToProductInOrder(this DO.Product s)
-        {
-            return new BO.ProductInOrder
-            (
-                ProdId: s.ProdId,
-                ProdName: s.ProdName,
-                ProdPrice: s.ProdPrice ?? 0,
-                QuantityInOrder: s.QuantityInStock ?? 0
-
-                );
-        }
     }
-}              
-                
-                
+}

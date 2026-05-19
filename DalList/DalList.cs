@@ -12,9 +12,11 @@ namespace Dal;
     {
     private DalList() {
     }
-    private static readonly DalList instance = new DalList();
-    public static DalList Instance => instance;
-    public ISale Sale => new SaleImplementation();
+        private static DalList s_instance;
+        public static IDal Instance => s_instance ??= new DalList();
+
+
+        public ISale Sale => new SaleImplementation();
         public IProduct Product => new ProductImplementation();
         public ICustomer Customer => new CustomerImplementation();
 

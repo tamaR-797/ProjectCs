@@ -1,7 +1,7 @@
-﻿using BO;
-namespace BL.BlApi
+﻿
+namespace BlApi
 {
-    public interface ISale : ICrud<BO.Sale>
+    public interface ISale : Icrud<BO.Sale>
     {
 
     }

@@ -1,12 +1,17 @@
-﻿using BL.BlApi;
-using BO;
+﻿using BlApi;
 
-namespace BL.BlImplementation;
 
-internal class Bl: BL.BlApi.IBl
+namespace BlImplementation
 {
-    public IProduct Product => new ProductImplementation();
-    public ICustomer Customer => new CustomerImplementation();
-    public ISale Sale => new SaleImplementation();
-    public IOrder Order => new OrderImplementation();
+    internal class BL : IBl
+    {
+        public ISale ISale => new SaleImplementation();
+
+        public IProduct IProduct => new ProductImplementation();
+
+        public IClient IClient => new ClientImplementation();
+
+        public IOrder IOrder => new OrderImplementation();
+
+    }
 }

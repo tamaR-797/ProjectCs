@@ -1,115 +1,103 @@
-﻿using DalApi;
+﻿
+
+using DalApi;
 using DO;
-using Dal;
-using static Dal.DataSource;
-using System.Linq;
+using System;
 using System.Reflection;
 using Tools;
-using System.Collections.Generic;
-using System;
-using BO;
-using BL.BO;
+using static Dal.DataSource;
 
-namespace DalList
+
+
+namespace Dal;
+
+
+public class SaleImplementation : ISale
 {
-    internal class SaleImplementation : ISale
+
+    public Sale Read(int id)
     {
-        public int Create(Sale item)
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read by id with: " + id);
+        var q = from s in sales
+                where s.id == id
+                select s;
+
+        if (q.FirstOrDefault() == null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start create");
-            if (item == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception create");
-                throw new NullItemException("Sale");
-            }
-
-            if (sales.Any(s => s?.SaleId == item.SaleId))
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception create");
-                throw new IdAlreadyExistsException($"{item.SaleId}");
-            }
-
-            int id = Config.getStaticValueSale;
-            Sale sale = item with { SaleId = id };
-            sales.Add(sale);
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish create");
-            return id;
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " id accepted not exist");
+            throw new DalDoesNotExistException($"Sale with ID {id} does not exist.");
+        }
+        else
+        {
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " end read call found sale");
+            return q.FirstOrDefault();
         }
 
-        public Sale? Read(int id)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start read");
-            var sale = sales.FirstOrDefault(s => s?.SaleId == id);
+    }
 
-            if (sale == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception read");
-                throw new IdNotFoundException($"{id}");
-            }
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish read");
-            return sale;
+    public int Create(Sale sale)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " called create with " + sale);
+        int idRun = SaleConfig.Next;
+        sale = sale with { id = idRun };
+        sales.Add(sale);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "created seccsesfully");
+        return idRun;
+
+    }
+
+    public void Delete(int id)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete with id : " + id);
+
+        var q = from s in sales
+                where s.id == id
+                select s;
+
+        Sale? s1 = q.FirstOrDefault();
+        if (s1 == null)
+        {
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception no id was found to delete");
+            throw new DalDoesNotExistException($"Sale with ID {id} does not exist and cannot be deleted.");
         }
 
-        public Sale? Read(Func<Sale, bool> filter)
+        sales.Remove(s1);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted seccesfully");
+    }
+
+    public void Update(Sale sale)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called update ");
+        Delete(sale.id);
+
+        sales.Add(sale);
+
+    }
+
+    List<Sale> ICrud<Sale>.ReadAll(Func<Sale, bool>? filter)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read all with filter: " + filter);
+
+        List<Sale> list = new List<Sale>();
+
+        if (filter != null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start read filter");
-            if (filter == null) throw new NullItemException("filter");
-            var sale = sales.FirstOrDefault(s => s != null && filter(s));
-            if (sale == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception read filter");
-                throw new IdNotFoundException("Sale");
-            }
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish read filter");
-            return sale;
+            list = sales.Where(s => filter(s)).ToList();
+        }
+        else
+        {
+            list = sales.ToList();
+
         }
 
-        public List<Sale?> ReadAll(Func<Sale?, bool>? filter = null)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start readAll");
-            IEnumerable<Sale?> query = sales;
-            if (filter != null)
-                query = query.Where(s => filter(s));
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "end read all call found " + list.Count() + " sales");
+        return list;
+    }
 
-            var list = query.ToList();
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish readAll");
-            return list;
-        }
+    Sale ICrud<Sale>.Read(Func<Sale, bool> filter)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read with filter: " + filter);
+        return sales.FirstOrDefault(s => filter(s));
 
-        public void Update(Sale item)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start update");
-
-            if (item == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception update");
-                throw new NullItemException("Sale cannot be null.");
-            }
-
-            var index = sales.FindIndex(s => s?.SaleId == item.SaleId);
-            if (index >= 0)
-            {
-                sales[index] = item;
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish update");
-            }
-            else
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception update");
-                throw new IdNotFoundException($"{item.SaleId}");
-            }
-        }
-
-        public void Delete(int id)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start delete");
-
-            var removedCount = sales.RemoveAll(s => s?.SaleId == id);
-            if (removedCount == 0)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception delete");
-                throw new IdNotFoundException($"{id}");
-            }
-        }
     }
 }
-

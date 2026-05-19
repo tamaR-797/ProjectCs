@@ -1,147 +1,166 @@
-﻿using BL.BlApi;
+﻿
+using DalApi;
+using BlApi;
 using BO;
 
-
-namespace BL.BlImplementation;
-
-internal class OrderImplementation : IOrder
+namespace BlImplementation
 {
-    private DalApi.IDal _dal = DalApi.Factory.Get;
-
-    public int DoOrder(Order order)
+    internal class OrderImplementation : IOrder
     {
-        // 1. בדיקות תקינות קלט בסיסיות (Validation)
-        if (order == null)
-            throw new BLNullPropertyException("Order", "Object");
-
-        if (order.Items == null || !order.Items.Any())
-            throw new BLInvalidInputException("Cannot place an empty order. Please add products to your cart.");
-
-        // 2. בדיקת מלאי וקיום מוצרים
-        foreach (var item in order.Items)
+        IDal _dal = DalApi.Factory.Get;
+        public void SearchSaleForProduct(BO.ProductInOrder productInOrder, bool isClubMember)
         {
-            var doProduct = _dal.Product.Read(item.ProductId);
+            var relevantSales = _dal.Sale.ReadAll(sale =>
+                sale.product_id == productInOrder.ProductId &&
+                sale.start_date <= DateTime.Now && sale.end_date >= DateTime.Now &&
+                productInOrder.Quantity_in_order >= sale.amount_to_sale &&
+                sale.count_to_sale > 0 &&
+                (isClubMember || !sale.to_club));
 
-            if (doProduct == null)
-                throw new BLIdNotFoundException(item.ProductId, "Product");
+            productInOrder.Sales = relevantSales.OrderBy(sale => sale.amount_to_sale).Select(sale => sale.convert()).Select(s => new SaleInProduct() { IsForAllClients = !s.to_club, Price_per_one = s.cost_per_one, Amount_to_sale = s.amount_to_sale, SaleId = s.Id }).ToList();
+        }
 
-            if (doProduct.Quantity < item.Quantity)
+        public void CalcTotalPriceForProduct(BO.ProductInOrder productInOrder)
+        {
+            int remainingQuantity = productInOrder.Quantity_in_order;
+            double totalPrice = 0;
+            List<BO.SaleInProduct> appliedSales = [];
+
+            if (productInOrder.Sales != null)
             {
-                throw new BLOutOfStockException(item.ProductId, doProduct.Name);
-            }
-        }
-
-        // 3. בדיקת קיום לקוח וחישוב מחירים
-        var customer = _dal.Customer.Read(order.CustomerId);
-        if (customer == null)
-        {
-            throw new BLIdNotFoundException(order.CustomerId, "Customer");
-        }
-
-        bool isClubMember = customer.IsClubMember;
-        double totalOrderPrice = 0;
-
-        foreach (var item in order.Items)
-        {
-            // בתוך CalculateItemPrice כבר קיימת חריגה אם המוצר לא נמצא
-            double itemTotalPrice = CalculateItemPrice(item.ProductId, item.Quantity, isClubMember);
-
-            item.PricePerUnit = itemTotalPrice / item.Quantity;
-            totalOrderPrice += itemTotalPrice;
-        }
-
-        if (totalOrderPrice <= 0)
-            throw new BLDataValidationException("Order", "TotalPrice", "must be greater than zero");
-
-        order.TotalPrice = totalOrderPrice;
-        order.OrderDate = DateTime.Now;
-
-        // 4. תהליך השמירה ב-DAL
-        try
-        {
-            // שמירת ההזמנה הראשית
-            int newOrderId = _dal.Order.Create(Tools.ToDo(order));
-
-            // שמירת פריטי ההזמנה ועדכון המלאי
-            foreach (var item in order.Items)
-            {
-                // שמירת פריט ההזמנה (מקושר ל-ID שנוצר)
-                _dal.OrderItem.Create(item.ToDo(newOrderId));
-
-                // עדכון המלאי ב-DAL
-                var doProduct = _dal.Product.Read(item.ProductId);
-                if (doProduct != null)
+                foreach (var sale in productInOrder.Sales)
                 {
-                    _dal.Product.Update(doProduct with { Quantity = doProduct.Quantity - item.Quantity });
+                    if (remainingQuantity < sale.Amount_to_sale)
+                    {
+                        continue;
+                    }
+
+                    int timesUsed = remainingQuantity / sale.Amount_to_sale;
+
+                    totalPrice += timesUsed * sale.Amount_to_sale * sale.Price_per_one;
+
+                    remainingQuantity -= timesUsed * sale.Amount_to_sale;
+
+                    appliedSales.Add(sale);
+
+                    if (remainingQuantity == 0)
+                    {
+                        break;
+                    }
                 }
             }
 
-            return newOrderId;
+            totalPrice += remainingQuantity * productInOrder.BasePrice;
+
+            productInOrder.FinalPrice_in_total = totalPrice;
+            productInOrder.Sales = appliedSales;
         }
-        catch (DO.AlreadyExistsIdException ex)
+
+        public void CalcTotalPrice(Order order)
         {
-            // המרה של חריגת DAL לחריגת BL תואמת
-            throw new BLAlreadyExistsException(order.Id, "Order", ex);
+            order.FinalPrice = order.Products.Select(product => { CalcTotalPriceForProduct(product); return product.FinalPrice_in_total; }).Sum();
         }
-        catch (DO.IdNotFoundException ex)
+
+        public List<BO.SaleInProduct> AddProductToOrder(BO.Order order, int productId, int quantityToAdd)
         {
-            throw new BLIdNotFoundException(order.Id, "Order", ex);
+            var doProduct = _dal.Product.Read(productId);
+            if (doProduct == null)
+            {
+                throw new BlDoesNotExistException($"Product with ID {productId} does not exist.");
+            }
+
+            var productInOrder = order.Products.FirstOrDefault(p => p.ProductId == productId);
+
+            if (productInOrder != null)
+            {
+                int newQuantity = productInOrder.Quantity_in_order + quantityToAdd;
+
+                if (newQuantity <= 0)
+                {
+                    order.Products.Remove(productInOrder);
+                    CalcTotalPrice(order);
+                    return new List<BO.SaleInProduct>();
+                }
+                if (doProduct.amount_in_stock < newQuantity)
+                {
+                    throw new BlNotInStockException($"Not enough stock. Requested: {newQuantity}, Available: {doProduct.amount_in_stock}");
+                }
+
+                productInOrder.Quantity_in_order = newQuantity;
+            }
+            else
+            {
+                if (quantityToAdd <= 0)
+                {
+                    throw new BlInvalidInputException("Cannot add a new product with zero or negative quantity.");
+                }
+
+                if (doProduct.amount_in_stock < quantityToAdd)
+                {
+                    throw new BlNotInStockException($"Not enough stock. Requested: {quantityToAdd}, Available: {doProduct.amount_in_stock}");
+
+                }
+
+                productInOrder = new BO.ProductInOrder
+                {
+                    ProductId = doProduct.id,
+                    Name = doProduct.product_name,
+                    BasePrice = doProduct.price,
+                    Quantity_in_order = quantityToAdd,
+                    Sales = new List<BO.SaleInProduct>()
+                };
+
+                order.Products.Add(productInOrder);
+            }
+
+            SearchSaleForProduct(productInOrder, order.IsPreferredClient);
+
+            CalcTotalPriceForProduct(productInOrder);
+
+            CalcTotalPrice(order);
+
+            return productInOrder.Sales;
         }
-        catch (Exception ex)
+
+        public void DoOrder(BO.Order order)
         {
-            // עטיפת שגיאות לא צפויות (כמו בעיות ב-XML) בשגיאת תהליך כללית
-            throw new BLOrderProcessException("An error occurred while saving the order to the database. Please try again.", ex);
+            foreach (var productInOrder in order.Products)
+            {
+                var doProduct = _dal.Product.Read(productInOrder.ProductId);
+
+                if (doProduct == null)
+                {
+                    throw new BlDoesNotExistException($"Product with ID {productInOrder.ProductId} does not exist in the database.");
+                }
+
+                if (doProduct.amount_in_stock < productInOrder.Quantity_in_order)
+                {
+                    throw new BlNotInStockException($"Cannot complete order. Not enough stock for product '{doProduct.product_name}'.");
+                }
+
+                if (productInOrder.Sales != null && productInOrder.Sales.Count > 0)
+                {
+                    int remainingQuantityForSales = productInOrder.Quantity_in_order;
+                    foreach (var appliedSale in productInOrder.Sales)
+                    {
+                        if (remainingQuantityForSales < appliedSale.Amount_to_sale)
+                            continue;
+
+                        int timesUsed = remainingQuantityForSales / appliedSale.Amount_to_sale;
+                        if (timesUsed <= 0)
+                            continue;
+
+
+                        remainingQuantityForSales -= timesUsed * appliedSale.Amount_to_sale;
+                        if (remainingQuantityForSales <= 0)
+                            break;
+                    }
+                }
+
+                _dal.Product.Update(doProduct with { amount_in_stock = doProduct.amount_in_stock - productInOrder.Quantity_in_order });
+            }
+
         }
-    }
 
-    public double CalculateItemPrice(int productId, int quantity, bool isClubMember)
-    {
-        var doProduct = _dal.Product.Read(productId);
-        if (doProduct == null) return 0;
-
-        double basePrice = doProduct.Price * quantity;
-
-        // חיפוש מבצע פעיל
-        var activeSale = (from s in _dal.Sale.ReadAll()
-                          where s != null &&
-                                s.ProductId == productId &&
-                                s.SaleStartDate <= DateTime.Now &&
-                                s.SaleEndDate >= DateTime.Now &&
-                                (!s.IsForClubMembers || isClubMember) &&
-                                quantity >= s.RequiredQuantity
-                          select s).FirstOrDefault();
-
-        return activeSale != null ? activeSale.DiscountedPrice * quantity : basePrice;
-    }
-
-    public double GetTotalOrderSum(List<OrderItem> items, bool isClubMember)
-    {
-        return items.Sum(item => CalculateItemPrice(item.ProductId, item.Quantity, isClubMember));
-    }
-
-    public bool IsStockAvailable(List<OrderItem> items)
-    {
-        return items.All(item => {
-            var p = _dal.Product.Read(item.ProductId);
-            return p != null && p.Quantity >= item.Quantity;
-        });
-    }
-
-    public List<Order> ReadAllOrders(Func<Order, bool>? filter = null)
-    {
-        return (from doOrd in _dal.Order.ReadAll()
-                let boOrd = Tools.ToBo(doOrd, _dal.OrderItem.ReadAllByOrder(doOrd.Id))
-                where filter == null || filter(boOrd)
-                select boOrd).ToList();
-    }
-
-    public Order? GetOrderDetails(int orderId)
-    {
-        var doOrder = _dal.Order.Read(orderId);
-        if (doOrder == null) return null;
-
-        // שליפת הפריטים השייכים להזמנה כדי להחזיר אובייקט BO שלם
-        var items = _dal.OrderItem.ReadAllByOrder(orderId);
-        return Tools.ToBo(doOrder, items);
     }
 }

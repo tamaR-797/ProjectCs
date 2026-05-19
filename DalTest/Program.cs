@@ -1,157 +1,245 @@
-﻿using DalApi;
-using DO;
+﻿using DO;
+
+using DalApi;
+
+using Dal;
+
 using Tools;
 
-
 namespace DalTest;
-public class program
+
+internal class Program
 {
-    private static readonly IDal s_dal = DalApi.Factory.Get;
-    public static void Main()
+
+    private static IDal s_dal = Factory.Get;
+
+    static void Main(string[] args)
     {
+        Console.WriteLine("to initializ type yes");
+        string input = Console.ReadLine();
+        if (input.ToLower() == "yes")
+            Initializatation.initialize();
         try
         {
-            Initalization.initialize();
-            Console.WriteLine("Data initialization completed.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred during DAL initialization: {ex.Message}");
-            return;
-        }
-        int num = 0;
-        do
-        {
-            Console.WriteLine("\n--- Main Menu ---");
-            Console.WriteLine("1. Customer DAL");
-            Console.WriteLine("2. Product DAL");
-            Console.WriteLine("3. Sale DAL");
-            Console.WriteLine("4. Order DAL (New!)");     // הוספה
-            Console.WriteLine("5. OrderItem DAL (New!)"); // הוספה
-            Console.WriteLine("6. Delete Old Logs");
-            Console.WriteLine("0. Exit");
-
-            if (!int.TryParse(Console.ReadLine(), out num)) continue;
-
-            switch (num)
+            while (true)
             {
-                case 1: CRUD(s_dal.Customer, detailsCustomer, "Customer"); break;
-                case 2: CRUD(s_dal.Product, detailsProduct, "Product"); break;
-                case 3: CRUD(s_dal.Sale, detailsSale, "Sale"); break;
-                case 4: CRUD(s_dal.Order, detailsOrder, "Order"); break; // הוספה
-                case 5: CRUDitem(s_dal.OrderItem); break; // טיפול מיוחד בגלל המתודות הנוספות
-                case 6: LogManager.DeleteOldLogs(); break;
-                case 0: Console.WriteLine("Exiting..."); break;
-            }
-        } while (num != 0);
+                DisplayMainMenu();
+                string choice = Console.ReadLine();
 
-    }
-    // מתודה גנרית לחיסכון בקוד - מטפלת בכל הישויות באותו אופן!
-    private static void CRUD<T>(ICrud<T> dal, Func<int, T> getDetails, string name) where T : class
-    {
-        int choice = showMenu(name);
-        try
-        {
-            switch (choice)
-            {
-                case 1:
-                    Console.WriteLine($"New ID: {dal.Create(getDetails(0))}");
+                if (choice == "4") // Exit option
+                {
                     break;
-                case 2:
-                    var result = dal.Read(getId());
-                    Console.WriteLine(result?.ToString() ?? "Not Found");
-                    break;
-                case 3:
-                    dal.Update(getDetails(getId()));
-                    break;
-                case 4:
-                    dal.Delete(getId());
-                    break;
-                case 5:
-                    var all = dal.ReadAll();
-                    if (all != null)
-                        foreach (var x in all) Console.WriteLine(x);
-                    break;
+                }
+
+                switch (choice)
+                {
+                    case "0":
+                        Tools.LogManager.DeleteOldLogFolders();
+                        break;
+                    case "1":
+                        ShowCrudMenu(s_dal.Sale, "sale");
+                        break;
+                    case "2":
+                        ShowCrudMenu(s_dal.Product, "prduct");
+                        break;
+                    case "3":
+                        ShowCrudMenu(s_dal.Customer, "customer");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Try again.");
+                        break;
+                }
             }
+
         }
-        catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
-    // מימוש ספציפי ל-OrderItem בגלל המתודות המיוחדות שלו
-    private static void CRUDitem(IOrderItem dal)
+    /// <summary>
+    /// show the menu of entity
+    /// </summary>
+    private static void DisplayMainMenu()
     {
-        int choice = showMenu("OrderItem");
-        if (choice == 5) dal.ReadAll().ForEach(x => Console.WriteLine(x));
-        if (choice == 1) dal.Create(detailsOrderItem(0));
-        // כאן אפשר להוסיף קריאות ל-ReadAllByOrder וכו'
+        Console.WriteLine("wellcome to our electronic store");
+        Console.WriteLine("Main Menu:");
+        Console.WriteLine("0. Delet old logs");
+        Console.WriteLine("1. Sale");
+        Console.WriteLine("2. Product");
+        Console.WriteLine("3. Customer");
+        Console.WriteLine("4. Exit");
+        Console.Write("Choose an option: ");
+    }
+    /// <summary>
+    /// show the menu of crud for each entity
+    /// </summary>
+    /// <typeparam name="T">the entity</typeparam>
+    /// <param name="inter">the interface that implement the crud for the entity</param>
+    /// <param name="name">the name of the entity (for visualety)</param>
+    private static void ShowCrudMenu<T>(ICrud<T> inter, string name)
+    {
+
+        Console.WriteLine($"\n CRUD Menu:");
+        Console.WriteLine("1. Create");
+        Console.WriteLine("2. Read");
+        Console.WriteLine("3. Read all");
+        Console.WriteLine("4. Update");
+        Console.WriteLine("5. Delete");
+        Console.WriteLine("6. Back to Main Menu");
+        Console.Write("Choose an option: ");
+
+        string choice = Console.ReadLine();
+        switch (choice)
+        {
+            case "1":
+                CreateEntity(inter, name);
+                break;
+            case "2":
+                ReadEntity(inter, name);
+                break;
+            case "3":
+                ReadAllEntity(inter, name);
+                break;
+            case "4":
+                UpdateEntity(inter, name);
+                break;
+            case "5":
+                DeleteEntity(inter, name);
+                break;
+            case "6":
+                return;
+            default:
+                Console.WriteLine("Invalid choice. Try again.");
+                break;
+        }
+    }
+    private static void ReadAllEntity<T>(ICrud<T> inter, string name)
+    {
+        var li = inter.ReadAll();
+        Console.WriteLine("the list of " + name + "s :");
+        li.ForEach(x => Console.WriteLine(x.ToString()));
+    }
+    private static void CreateEntity<T>(ICrud<T> inter, string name)
+    {
+
+        if (inter is ICrud<Sale>)
+        {
+            ISale saleInter = (ISale)inter;
+            Sale sale = GetSaleFromInput();
+            saleInter.Create(sale);
+        }
+        else if (inter is ICrud<Product>)
+        {
+            IProduct productInter = (IProduct)inter;
+            var product = GetProductFromInput();
+            productInter.Create(product);
+        }
+        else if (inter is ICrud<Customer>)
+        {
+            ICustomer customerInter = (ICustomer)inter;
+            var customer = GetCustomerFromInput();
+            customerInter.Create(customer);
+        }
+        else
+        {
+            Console.WriteLine("Unsupported record type.");
+        }
     }
 
-    // --- עזרי קלט ---
 
-    private static Order detailsOrder(int id) {
-        Console.WriteLine("Enter Customer ID for this order:");
-        int custId = int.Parse(Console.ReadLine()!);
-        return new Order { Id = id, CustomerId = custId, OrderDate = DateTime.Now };
-    }
-    private static OrderItem detailsOrderItem(int id)
-    {
-        Console.WriteLine("Enter Order ID and Product ID:");
-        return new OrderItem { OrderId = int.Parse(Console.ReadLine()!), ProductId = int.Parse(Console.ReadLine()!) };
-    }
 
-    private static int getId()
+    private static Sale GetSaleFromInput()
     {
-        Console.Write("Enter ID: ");
-        return int.Parse(Console.ReadLine()!);
-    }
-
-    private static int showMenu(string entity)
-    {
-        Console.WriteLine($"\n--- {entity} Menu ---");
-        Console.WriteLine("1. Create\n2. Read\n3. Update\n4. Delete\n5. Read All\n6. Back");
-        return int.Parse(Console.ReadLine()!);
-    }
-    private static Customer detailsCustomer(int id = 0)
-    {
-        Console.WriteLine("Please enter the customer details: ");
-        Console.WriteLine("Name: ");
-        Console.WriteLine("Address: ");
-        Console.WriteLine("Phone: ");
-        string name = Console.ReadLine()!;
-        string address = Console.ReadLine()!;
-        string phone = Console.ReadLine()!;
-        return new Customer(id, name, address, phone);
-    }
-    private static Product detailsProduct(int id = 0)
-    {
-        Console.WriteLine("Please enter the product details: ");
-        Console.WriteLine("Name: ");
-        string name = Console.ReadLine()!;
-        Console.WriteLine("Category: ");
-        Categories category = (Categories)Enum.Parse(typeof(Categories), Console.ReadLine()!);
-        Console.WriteLine("Price: ");
-        double price = double.Parse(Console.ReadLine()!);
-        Console.WriteLine("Quantity in stock:  ");
-        int quantity = int.Parse(Console.ReadLine()!);
-        return new Product(id, name, category, price, quantity);
-    }
-    private static Sale detailsSale(int id = 0)
-    {
-        Console.WriteLine("Please enter the sale details: ");
-        Console.WriteLine("Product ID: ");
+        Console.WriteLine("Enter Sale details:");
+        int id = int.Parse(Console.ReadLine()!);
         int productId = int.Parse(Console.ReadLine()!);
-        Console.WriteLine("Quantity: ");
-        int quantity = int.Parse(Console.ReadLine()!);
-        Console.WriteLine("Price per unit: ");
-        double pricePerUnit = double.Parse(Console.ReadLine()!);
-        Console.WriteLine("Is delivered (true/false): ");
-        bool isDelivered = bool.Parse(Console.ReadLine()!);
-        Console.WriteLine("start date (yyyy-MM-dd) or leave empty: ");
-        string startDateInput = Console.ReadLine()!;
-        DateTime? startDate = string.IsNullOrWhiteSpace(startDateInput) ? DateTime.Now : DateTime.Parse(startDateInput);
-        Console.WriteLine("end date (yyyy-MM-dd) or leave empty: ");
-        string endDateInput = Console.ReadLine()!;
-        DateTime? endDate = string.IsNullOrWhiteSpace(endDateInput) ? DateTime.Now : DateTime.Parse(endDateInput);
-        return new Sale(id, productId, quantity, pricePerUnit, isDelivered, startDate, endDate);
+        int amountToSale = int.Parse(Console.ReadLine()!);
+        int countToSale = int.Parse(Console.ReadLine()!);
+        bool toClub = bool.Parse(Console.ReadLine()!);
+        DateTime startDate = DateTime.Parse(Console.ReadLine()!);
+        DateTime endDate = DateTime.Parse(Console.ReadLine()!);
+
+        return new Sale(id, productId, amountToSale, countToSale, toClub, startDate, endDate);
     }
-   
+
+    private static Product GetProductFromInput()
+    {
+        Console.WriteLine("Enter Product details:");
+        int id = int.Parse(Console.ReadLine()!);
+        Categories category = (Categories)Enum.Parse(typeof(Categories), Console.ReadLine()!);
+        string productName = Console.ReadLine()!;
+        int price = int.Parse(Console.ReadLine()!);
+        int amountInStock = int.Parse(Console.ReadLine()!);
+
+        return new Product(id, category, productName, price, amountInStock);
+    }
+
+    private static Customer GetCustomerFromInput()
+    {
+        Console.WriteLine("Enter Customer details:");
+        int id = int.Parse(Console.ReadLine()!);
+        string customerName = Console.ReadLine()!;
+        string customerAddress = Console.ReadLine()!;
+        string customerPhone = Console.ReadLine()!;
+        bool isClubMember = bool.Parse(Console.ReadLine() ?? "false")!;
+
+        return new Customer(id, customerName, customerAddress, customerPhone, isClubMember);
+    }
+
+    private static void ReadEntity<T>(ICrud<T> inter, string name)
+    {
+        Console.Write($"Enter ID to read {name}: ");
+        int input = int.Parse(Console.ReadLine());
+        Console.WriteLine($"Reading {name} with ID: {input}");
+        var item = inter.Read(input);
+        Console.WriteLine(item.ToString());
+    }
+
+    private static void UpdateEntity<T>(ICrud<T> inter, string name)
+    {
+        Console.Write($"Enter ID to update {name}: ");
+        int id = int.Parse(Console.ReadLine());
+
+        if (inter is ICrud<Sale>)
+        {
+            ISale saleInter = (ISale)inter;
+            Sale sale = GetSaleFromInput();
+            saleInter.Update(sale);
+        }
+        else if (inter is ICrud<Product>)
+        {
+            IProduct productInter = (IProduct)inter;
+            var product = GetProductFromInput();
+            productInter.Update(product);
+        }
+        else if (inter is ICrud<Customer>)
+        {
+            ICustomer customerInter = (ICustomer)inter;
+            var customer = GetCustomerFromInput();
+            customerInter.Update(customer);
+        }
+        else
+        {
+            Console.WriteLine("Unsupported record type.");
+        }
+        Console.WriteLine($"{name} with ID {id} updated");
+    }
+
+    private static void DeleteEntity<T>(ICrud<T> inter, string name)
+    {
+        Console.Write($"Enter ID to delete {name}: ");
+        int id = int.Parse(Console.ReadLine());
+        inter.Delete(id);
+        Console.WriteLine($"{name} with ID {id} deleted.");
+    }
+
+
 }
+
+
+
+
+
+
+

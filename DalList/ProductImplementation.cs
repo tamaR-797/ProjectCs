@@ -1,109 +1,109 @@
-﻿
-using DalApi;
-using DO;
-using Dal;
-using static Dal.DataSource;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DO;
+using DalApi;
 using System.Reflection;
 using Tools;
-namespace DalList;
-using BO;
-using BL.BO;
+using static Dal.DataSource;
 
-internal class ProductImplementation : IProduct
+
+
+namespace Dal;
+
+public class ProductImplementation : IProduct
 {
-    public int Create(Product item)
-    {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start create");
-        if (products.Any(p => item.ProdId == p?.ProdId))
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception create");
-            throw new IdAlreadyExistsException($"{item.ProdId}");
-        }
 
-        int id = Config.getStaticValueProduct;
-        Product product = item with { ProdId = id };
-        products.Add(product);
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish create");
-        return id;
-    }
 
     public Product Read(int id)
     {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start read");
-        var product = products.FirstOrDefault(p => id == p?.ProdId);
-        if (product == null)
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read with: " + id);
+        var q = from p in products
+                where p.id == id
+                select p;
+
+        if (q.FirstOrDefault() == null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception read");
-            throw new IdNotFoundException($"{id}");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read failed: " + id + " does not exist");
+            throw new DalDoesNotExistException($"Product with ID {id} does not exist.");
         }
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish read");
-        return product;
-    }
-    public Product? Read(Func<Product, bool> filter)
-    {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start filter read");
-        var product = products.FirstOrDefault(p => filter(p));
-        if (product == null)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception filter read");
-            throw new NullItemException("product");
-        }
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish filter read");
-        return product;
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "read successfully");
+        return q.FirstOrDefault();
     }
 
-    public List<Product?> ReadAll(Func<Product?, bool> filter = null)
+    public int Create(Product product)
     {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start readAll");
-        if (filter != null)
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called create with: " + product);
+        if (products.Any(p => p.id == product.id))
         {
-            var list=from p in products
-                     where filter(p)
-                     select p ;
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish readAll");
-            return list.ToList ();
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called create failed: product already exists");
+            throw new DalAlreadyExistsException($"Product with ID {product.id} already exists.");
         }
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish null readAll");
-        return products.ToList();
-    }
-
-    public void Update(Product item)
-    {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start update");
-        if (item == null)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception update");
-            throw new NullItemException("Product cannot be null.");
-        }
-
-        var existingProduct = products.FirstOrDefault(p => item.ProdId == p?.ProdId);
-        if (existingProduct != null)
-        {
-            Delete(item.ProdId);
-            products.Add(item);
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish update");
-        }
-        else
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception id update");
-            throw new IdNotFoundException($"{item.ProdId}");
-        }
+        int idRun = ProductConfig.Next;
+        product = product with { id = idRun };
+        products.Add(product);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "created successfully");
+        return idRun;
     }
 
     public void Delete(int id)
     {
-        LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start delete");
-        var product = products.FirstOrDefault(p => id == p?.ProdId);
-        if (product != null)
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete with id: " + id);
+
+        var q = from p in products
+                where p.id == id
+                select p;
+
+        Product? p1 = q.FirstOrDefault();
+        if (p1 == null)
         {
-            products.Remove(product);
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish update");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete failed: " + id + " does not exist");
+            throw new DalDoesNotExistException($"Product with ID {id} does not exist and cannot be deleted.");
+        }
+
+        products.Remove(p1);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted successfully");
+    }
+
+    public void Update(Product product)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called update with: " + product);
+        Delete(product.id);
+        products.Add(product);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "updated successfully");
+    }
+
+    List<Product> ICrud<Product>.ReadAll(Func<Product, bool>? filter)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read all with filter: " + (filter != null ? filter.ToString() : "null"));
+
+        List<Product> list = new List<Product>();
+
+        if (filter != null)
+        {
+            list = products.Where(p => filter(p)).ToList();
         }
         else
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception id update");
-            throw new NullItemException("Product cannot be null.");
+            list = products.ToList();
         }
+
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "read all successfully, found " + list.Count() + " products");
+        return list;
+    }
+
+    Product ICrud<Product>.Read(Func<Product, bool> filter)
+    {
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read by filter");
+        Product result = products.FirstOrDefault(p => filter(p));
+        if (result == null)
+        {
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read failed: product with filter does not exist");
+            throw new DalDoesNotExistException("Product with filter does not exist.");
+        }
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "read by filter successfully");
+        return result;
     }
 }

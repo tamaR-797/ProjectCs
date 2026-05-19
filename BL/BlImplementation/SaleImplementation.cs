@@ -1,55 +1,111 @@
-﻿//using DO;
-using DalApi;
-using BO;
+﻿using BO;
+using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-
-namespace Dal;
-
-    internal class SaleImplementation : ISale
+namespace BlImplementation
+{
+    internal class SaleImplementation : BlApi.ISale
     {
-        // פונקציות עזר לטעינה ושמירה מהירה
-        private List<Sale> Load() => XMLTools.LoadListFromXmlSerializer<Sale>("sales");
-        private void Save(List<Sale> list) => XMLTools.SaveListToXmlSerializer(list, "sales");
+        private DalApi.IDal _dal = DalApi.Factory.Get;
 
-        public int Create(Sale item)
+        public int Create(BO.Sale sale)
         {
-            var sales = Load();
-
-            // קבלת מספר רץ מהקונפיגורציה שיצרתן
-            int nextId = Config.getStaticValueSale;
-
-            // יצירת מופע חדש עם ה-ID שקיבלנו
-            Sale newSale = item with { SaleId = nextId };
-
-            sales.Add(newSale);
-            Save(sales);
-            return nextId;
-        }
-
-        public Sale? Read(int id) => Load().FirstOrDefault(s => s.SaleId == id);
-
-        public IEnumerable<Sale?> ReadAll(Func<Sale, bool>? filter = null)
-        {
-            var sales = Load();
-            return filter == null ? sales : sales.Where(filter);
-        }
-
-        public void Update(Sale item)
-        {
-            var sales = Load();
-            // מחיקת הישן והוספת החדש (כי זה record)
-            if (sales.RemoveAll(s => s.SaleId == item.SaleId) == 0)
-                throw new Exception("Sale not found");
-
-            sales.Add(item);
-            Save(sales);
+            try
+            {
+                return _dal.Sale.Create(sale.convert());
+            }
+            catch (DO.DalAlreadyExistsException ex)
+            {
+                throw new BO.BlAlreadyExistsException($"Failed to add sale with ID {sale.Id}: Sale already exists.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to add sale with ID {sale.Id}: {ex.Message}", ex);
+            }
         }
 
         public void Delete(int id)
         {
-            var sales = Load();
-            if (sales.RemoveAll(s => s.SaleId == id) == 0)
-                throw new Exception("Sale not found");
-            Save(sales);
+            try
+            {
+                _dal.Sale.Delete(id);
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to delete sale with ID {id}: Sale does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to delete sale with ID {id}: {ex.Message}", ex);
+            }
         }
+
+        public BO.Sale Get(int id)
+        {
+            try
+            {
+                var dalSale = _dal.Sale.Read(id);
+                return dalSale.convert();
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to get sale with ID {id}: Sale does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get sale with ID {id}: {ex.Message}", ex);
+            }
+        }
+
+        public BO.Sale? Get(Func<BO.Sale, bool> filter)
+        {
+            try
+            {
+                var dalSales = _dal.Sale.ReadAll();
+                var boSales = dalSales.Select(s => s.convert());
+                return boSales.FirstOrDefault(filter);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get sale with filter: {ex.Message}", ex);
+            }
+        }
+
+        public IEnumerable<BO.Sale> GetAll(Func<BO.Sale, bool> filter)
+        {
+            try
+            {
+                var dalSales = _dal.Sale.ReadAll();
+                if (filter == null)
+                {
+                    return dalSales.Select(s => s.convert()).ToList();
+                }
+                return dalSales.Select(s => s.convert()).Where(filter).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get all sales: {ex.Message}", ex);
+            }
+        }
+
+        public void Update(BO.Sale sale)
+        {
+            try
+            {
+                _dal.Sale.Update(sale.convert());
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to update sale with ID {sale.Id}: Sale does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to update sale with ID {sale.Id}: {ex.Message}", ex);
+            }
+        }
+    }
 }

@@ -1,13 +1,26 @@
-﻿
-using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DO
 {
-    public record Product(int ProdId, string? ProdName=null, Categories? category=null, double? ProdPrice=null, int? QuantityInStock = null)
+    public record Product(
+         int id,
+         Categories category,
+         string product_name,
+         int price,
+         int amount_in_stock)
     {
-        public Product() : this(0)
+
+        public Product() : this(0, Categories.SHIRTS, "", 0, 0)
         {
         }
-    }
 
+        public override string ToString()
+        {
+            return $"Product ID: {this.id},category: {category}, name: {product_name}, price: {price}, amount in stock: {amount_in_stock}";
+        }
+    }
 }

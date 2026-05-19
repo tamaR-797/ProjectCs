@@ -1,117 +1,70 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.IO;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-
-//namespace Tools
-//{
-//    public static class LogManager
-//    {
-//        private const string LogFolderName = "Log";
-
-//        public static string GetPathFolder()
-//        {
-//            return $"{DateTime.Now.Month:MM}";
-//            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LogFolderName);
-//        }
-//        public static string GetPathFile()
-//        {
-//            string directoryPath = GetPathFolder();
-
-//            string fileName = $"Log_{DateTime.Now:yyyy-MM-dd}.txt";
-
-//            return Path.Combine(directoryPath, fileName);
-//        }
-//        public static void WriteToLog(string projectName, string funcName, string message)
-//        {
-//            if (!Directory.Exists($"{LogFolderName}\\{GetPathFolder()}"))
-//            {
-//                Directory.CreateDirectory($"{LogFolderName}\\{GetPathFolder()}");
-//            }
-//            string path = $"{LogFolderName}\\{GetPathFolder()}\\ {GetPathFile()}";
-//            if (!File.Exists(path))
-//                File.Create(path).Close();
-//            using (StreamWriter writer = new StreamWriter(path, true))
-//            {
-//                writer.WriteLine($"{DateTime.Now}\\t{projectName}.{funcName}:\\t{message}");
-//            }
-//        }
-//        public static void DeleteOldLogs()
-//        {
-//            var dirLog = Directory.GetDirectories(LogFolderName);
-//            foreach (var dir in dirLog)
-//            {
-
-//                if ((DateTime.Now -Directory.GetCreationTime(dir)).TotalDays > 60)
-//                {
-//                    Directory.Delete(dir, true);
-//                }
-
-
-//            }
-//        }
-//    }
-//}
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+
 
 namespace Tools
 {
     public static class LogManager
     {
-        private const string LogFolderName = "Log";
+        private const string logFolderName = "Log";
+        private static DirectoryInfo path = Directory.CreateDirectory(logFolderName);
 
-        public static string GetPathFolder()
+        public static string TodayPath()
         {
-            // return month folder under application base + Log folder
-            string monthFolder = DateTime.Now.Month.ToString("00");
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LogFolderName, monthFolder);
+            return DateTime.Now.Day.ToString();
         }
-        public static string GetPathFile()
+
+        public static string MonthPath()
         {
-            string directoryPath = GetPathFolder();
-
-            string fileName = $"Log_{DateTime.Now:yyyy-MM-dd}.txt";
-
-            return Path.Combine(directoryPath, fileName);
+            return DateTime.Now.Month.ToString();
         }
-        public static void WriteToLog(string projectName, string funcName, string message)
+
+        public static void WriteLog(string project, string funcName, string message)
         {
-            string folder = GetPathFolder();
-            if (!Directory.Exists(folder))
+            string monthPath = MonthPath();
+            string todayPath = TodayPath();
+            string logMessage = $"{DateTime.Now}: [{project}] [{funcName}] - {message}";
+
+            // יצירת תיקיית חודש אם לא קיימת
+            string monthDirectoryPath = Path.Combine(path.FullName, monthPath);
+            if (!Directory.Exists(monthDirectoryPath))
             {
-                Directory.CreateDirectory(folder);
+                Directory.CreateDirectory(monthDirectoryPath);
             }
-            string path = GetPathFile();
-            if (!File.Exists(path))
-                File.Create(path).Close();
-            using (StreamWriter writer = new StreamWriter(path, true))
+
+            // קובץ לוג לפי תאריך
+            string logFilePath = Path.Combine(monthDirectoryPath, $"{todayPath}.log");
+
+            // הוספת הודעה לקובץ הלוג
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
             {
-                writer.WriteLine($"{DateTime.Now}\t{projectName}.{funcName}:\t{message}");
+                writer.WriteLine(logMessage);
             }
         }
-        public static void DeleteOldLogs()
+
+        public static void DeleteOldLogFolders()
         {
-            string root = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LogFolderName);
-            if (!Directory.Exists(root)) return;
-
-            var dirLog = Directory.GetDirectories(root);
-            foreach (var dir in dirLog)
+            var directories = path.GetDirectories();
+            foreach (var directory in directories)
             {
-
-                if ((DateTime.Now - Directory.GetCreationTime(dir)).TotalDays > 60)
+                // Try to parse the directory name as an integer (month number)
+                if (int.TryParse(directory.Name, out int monthNumber))
                 {
-                    Directory.Delete(dir, true);
+                    // If directory is older than 2 months, delete it
+                    if (monthNumber <= DateTime.Now.AddMonths(-2).Date.Month && monthNumber != DateTime.Now.AddMonths(-1).Date.Month && monthNumber != DateTime.Now.Date.Month)
+                    {
+                        directory.Delete(true);
+                    }
                 }
-
-
             }
         }
     }
 }
+
+
+

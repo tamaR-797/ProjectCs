@@ -1,9 +1,12 @@
-﻿using BO;
+﻿using System.Collections.Generic;
 
-namespace BL.BlApi
+namespace BlApi;
+
+public interface IOrder
 {
-    public interface IOrder : ICrud<Order>
-    {
-        //List<SaleInProduct> AddProductToOrder(Order order, int productId, int amount);
-    }
+    List<BO.SaleInProduct> AddProductToOrder(BO.Order order, int productId, int quantity);
+    void CalcTotalPriceForProduct(BO.ProductInOrder productInOrder);
+    void CalcTotalPrice(BO.Order order);
+    void DoOrder(BO.Order order);
+    void SearchSaleForProduct(BO.ProductInOrder productInOrder, bool isPreferredClient);
 }

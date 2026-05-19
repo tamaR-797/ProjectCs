@@ -4,24 +4,33 @@ namespace Dal;
 internal static class DataSource
 {
 
-    internal static List<Sale?> sales = new List<Sale?>();
-    internal static List<Customer?> customers = new List<Customer?>();
-    internal static List<Product?> products = new List<Product?>();
+    internal static List<Sale> sales = new List<Sale>();
+    internal static List<Customer> customers = new List<Customer>();
+    internal static List<Product> products = new List<Product>();
     
-    
-    
-    internal static class Config 
+}
+
+static internal class ProductConfig
+{
+    internal const int start = 1001; // product ids can start from a different base
+
+    private static int current = start;
+
+    public static int Next
     {
-        internal const int minSale = 100;
-        private static int staticValueSale = minSale;
-        public static int getStaticValueSale { get { return staticValueSale++; } }
-
-        internal const int minCustomer = 1000;
-        private static int staticValueCustomer = minCustomer;
-        public static int getStaticValueCustomer { get { return staticValueCustomer++; } }
-
-        internal const int minProduct = 10000;
-        private static int staticValueProduct = minProduct;
-        public static int getStaticValueProduct { get { return staticValueProduct++; } }
+        get { return current++; }
     }
 }
+
+static internal class SaleConfig
+{
+    internal const int start = 100; // sale ids start from 100
+
+    private static int current = start;
+
+    public static int Next
+    {
+        get { return current++; }
+    }
+}
+

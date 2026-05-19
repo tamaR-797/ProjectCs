@@ -1,94 +1,109 @@
-﻿using DalApi;
-using System.Xml.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BO;
+using DO;
 
-namespace Dal
+namespace BlImplementation
 {
-    internal class ProductImplementation : IProduct
+    internal class ProductImplementation : BlApi.IProduct
     {
-        readonly string filePath = @"..\xml\products.xml";
+        private DalApi.IDal _dal = DalApi.Factory.Get;
 
-        public int Create(Product item)
+        public BO.Product Get(int id)
         {
-            XElement root = XElement.Load(filePath);
-            int nextId = Config.getStaticValueProduct;
-
-            XElement prod = new XElement("Product",
-                new XElement("ProdId", nextId),
-                new XElement("ProdName", item.ProdName),
-                new XElement("category", item.category.ToString()), // המרת Enum למחרוזת
-                new XElement("ProdPrice", item.ProdPrice),
-                new XElement("QuantityInStock", item.QuantityInStock)
-            );
-
-            root.Add(prod);
-            root.Save(filePath);
-            return nextId;
+            try
+            {
+                var dalProduct = _dal.Product.Read(id);
+                return dalProduct.convert();
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to get product with ID {id}: Product does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get product with ID {id}: {ex.Message}", ex);
+            }
         }
 
-        public int Create(DO.Product t)
+        public BO.Product? Get(Func<BO.Product, bool> filter)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var dalProducts = _dal.Product.ReadAll();
+                var boProducts = dalProducts.Select(p => p.convert());
+                return boProducts.FirstOrDefault(filter);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get product with filter: {ex.Message}", ex);
+            }
+        }
+
+        public IEnumerable<BO.Product> GetAll(Func<BO.Product, bool> filter)
+        {
+            try
+            {
+                var dalProducts = _dal.Product.ReadAll();
+                if (filter == null)
+                    return dalProducts.Select(p => p.convert()).ToList();
+                return dalProducts.Select(p => p.convert()).Where(filter).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to get all products: {ex.Message}", ex);
+            }
+        }
+
+        public int Create(BO.Product product)
+        {
+            try
+            {
+                return _dal.Product.Create(product.convert());
+            }
+            catch (DO.DalAlreadyExistsException ex)
+            {
+                throw new BO.BlAlreadyExistsException($"Failed to add product with ID {product.Id}: Product already exists.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to add product with ID {product.Id}: {ex.Message}", ex);
+            }
+        }
+
+        public void Update(BO.Product product)
+        {
+            try
+            {
+                _dal.Product.Update(product.convert());
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to update product with ID {product.Id}: Product does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to update product with ID {product.Id}: {ex.Message}", ex);
+            }
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dal.Product.Delete(id);
+            }
+            catch (DO.DalDoesNotExistException ex)
+            {
+                throw new BO.BlDoesNotExistException($"Failed to delete product with ID {id}: Product does not exist.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new BO.BlInvalidInputException($"Failed to delete product with ID {id}: {ex.Message}", ex);
+            }
         }
-
-        public Product? Read(int id)
-        {
-            XElement root = XElement.Load(filePath);
-
-            return (from p in root.Elements()
-                    where (int?)p.Element("ProdId") == id
-                    select new Product
-                    {
-                        ProdId = (int)p.Element("ProdId")!,
-                        ProdName = (string?)p.Element("ProdName"),
-                        category = Enum.Parse<Categories>((string)p.Element("category")!),
-                        ProdPrice = (double)(double?)p.Element("ProdPrice"),
-                        QuantityInStock = (int)(int?)p.Element("QuantityInStock")
-                    }).FirstOrDefault();
-        }
-
-        public DO.Product? Read(Func<DO.Product, bool> filter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Product?> ReadAll(Func<Product, bool>? filter = null)
-        {
-            XElement root = XElement.Load(filePath);
-
-            var products = from p in root.Elements()
-                           select new Product
-                           {
-                               ProdId = (int)p.Element("ProdId")!,
-                               ProdName = (string?)p.Element("ProdName"),
-                               category = Enum.Parse<Categories>((string)p.Element("category")!),
-                               ProdPrice = (double?)p.Element("ProdPrice"),
-                               QuantityInStock = (int?)p.Element("QuantityInStock")
-                           };
-
-            return filter == null ? products : products.Where(filter);
-        }
-
-        public List<DO.Product?> ReadAll(Func<DO.Product?, bool>? filter = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(DO.Product t)
-        {
-            throw new NotImplementedException();
-        }
-
-        DO.Product? ICrud<DO.Product>.Read(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        // במימוש Update ו-Delete ב-XElement, מחפשים את ה-Element לפי ה-ID ומוחקים/מעדכנים אותו מה-Root
     }
 }

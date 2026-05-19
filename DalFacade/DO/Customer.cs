@@ -6,10 +6,24 @@ using System.Threading.Tasks;
 
 namespace DO
 {
-   public  record Customer(int CustId=0, string ?CustName=null,string ?CustAddress=null,string ?CustPhone=null)
+    public record Customer(
+        int id,
+         string customer_name,
+         string customer_adress,
+         string customer_phon,
+         bool isClubMember
+        )
     {
-public Customer() : this(0)
+
+        public Customer() : this(0, "", "", "", false)
         {
+
         }
+
+        public override string ToString()
+        {
+            return $"Customer ID: {this.id}, name: {customer_name}, adress: {customer_adress}, phon: {customer_phon}, isClubMember: {isClubMember}";
+        }
+
     }
 }

@@ -1,17 +1,29 @@
 ﻿using DalApi;
-using DO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dal;
-
- internal sealed class DalXml : IDal
+namespace Dal
 {
-    private static readonly Lazy<DalXml> _instance = new Lazy<DalXml>(() => new DalXml());
-    public static DalXml Instance => _instance.Value;
-    private DalXml() { }
+    sealed internal class DalXml : IDal
+    {
+        private DalXml() { }
 
-    public ICustomer Customer => new CustomerImplementation();
-    public IProduct Product => new ProductImplementation();
-    public ISale Sale => new SaleImplementation();
-    public IOrder Order => new OrderImplementaion(); // הוספה
-    public IOrderItem OrderItem => new OrderItemImplementaion(); // הוספה
+        private static readonly DalXml instance = new DalXml();
+
+        public static DalXml Instance
+        {
+            get { return instance; }
+        }
+
+        public ISale Sale => new SaleImplementation();
+
+        public IProduct Product => new ProductImplementation();
+
+        public ICustomer Customer => new CustomerImplementation();
+    }
+
+
 }

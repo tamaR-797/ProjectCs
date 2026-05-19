@@ -1,127 +1,108 @@
-﻿
+﻿using DO;
 using DalApi;
-using DO;
-using static Dal.DataSource;
-using System.Linq;
 using System.Reflection;
 using Tools;
-using BO;
-using BL.BO;
+using static Dal.DataSource;
 
-namespace Dal
+namespace Dal;
+
+
+public class CustomerImplementation : ICustomer
 {
-    internal class CustomerImplementation : ICustomer
+
+    public Customer Read(int id)
     {
-        public int Create(Customer item)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start create");
-            if (customers.Any(c => item.CustId == c?.CustId)) {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception create");
-            throw new IdAlreadyExistsException($"{item.CustId}");
-        }
-            int id = Config.getStaticValueCustomer;
-            Customer cust = item with { CustId = id };
-            customers.Add(cust);
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish create");
-            return id;
-        }
+        LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read by id with: " + id);
 
-        public Customer? Read(int id)
-        {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start read");
-            var customer = customers.FirstOrDefault(c => id == c?.CustId);
-            if (customer == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception read");
-                throw new IdNotFoundException($"{id}");
-            }
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish read");
-            return customer;
-            }
-      
+        var q = from c in customers
+                where c.id == id
+                select c;
 
-        public Customer? Read(Func<Customer, bool> filter)
+        if (q.FirstOrDefault() == null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start read filter");
-            var customer = customers.FirstOrDefault(c => filter(c));
-            if (customer == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception read filter");
-                throw new NullItemException("customer");
-            }
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish read filter");
-            return customer;
+            Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " id accepted not exist");
+            throw new DalDoesNotExistException($"Customer with ID {id} does not exist.");
+        }
+        else
+
+        {
+            Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " end read call found customer");
+            return q.FirstOrDefault();
         }
 
+    }
 
-        public List<Customer?> ReadAll(Func<Customer?, bool> filter = null)
+    public int Create(Customer customer)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " called create with " + customer);
+
+        // צריך לעשות רק ב customer
+        bool exist = customers.Any(c => c.id == customer.id);
+        if (exist)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start readAll");
-            if (filter != null)
-            {
-                var list = from cust in customers
-                           where filter(cust)
-                           select cust;
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish readAll");
-                return list.ToList();
-            }
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish readAllNull");
-            return customers;
+            Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception id already exists");
+            throw new DalAlreadyExistsException($"Customer with ID {customer.id} already exists.");
         }
-        //public List<Customer?> ReadAll(Func<Customer?, bool> filter = null)
-        //{
-        //    if (filter != null)
-        //    {
-        //        var list =
-        //             from c in customers
-        //             where filter(c)
-        //             select c;
-                     
-        //        return list.ToList();
-        //    }
-        //   return customers.ToList();
+        customers.Add(customer);
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "created successfully");
+        return customer.id;
 
-        //}
-        
-        public void Update(Customer item)
+
+    }
+
+    public void Delete(int id)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete with id : " + id);
+
+        var q = from c in customers
+                where c.id == id
+                select c;
+
+
+        Customer? s1 = q.FirstOrDefault();
+
+        if (s1 == null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start update");
-            if (item == null)
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception null update");
-                throw new NullItemException("Customer cannot be null.");
-            }
-            var existingCustomer = customers.FirstOrDefault(c => item.CustId == c?.CustId);
-            if (existingCustomer != null)
-            {
-                Delete(item.CustId);
-                customers.Add(item);
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish update");
-
-            }
-            else
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception id null ");
-                throw new IdNotFoundException($"{item.CustId}");
-            }
+            Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception no id was found to delete");
+            throw new DalDoesNotExistException($"Customer with ID {id} does not exist and cannot be deleted.");
         }
+        customers.Remove(s1);
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted successfully");
 
-        public void Delete(int id)
+    }
+
+    public void Update(Customer customer)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called update ");
+        Delete(customer.id);
+
+        customers.Add(customer);
+
+    }
+
+    List<Customer> ICrud<Customer>.ReadAll(Func<Customer, bool>? filter)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read all with filter");
+
+        List<Customer> list = new List<Customer>();
+
+        if (filter != null)
         {
-            LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "start delete");
-            // Find the customer with the read given id
-            var customer = customers.FirstOrDefault(c => id == c?.CustId);
-            if (customer != null)
-            {
-                customers.Remove(customer);
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "finish delete");
-
-            }
-            else
-            {
-                LogManager.WriteToLog(MethodBase.GetCurrentMethod().DeclaringType.FullName, MethodBase.GetCurrentMethod().Name, "exception delete");
-                throw new NullItemException("");
-            }
+            list = customers.Where(c => filter(c)).ToList();
         }
+        else
+        {
+            list = customers.ToList();
+
+        }
+
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "end read all call found " + list.Count() + " customers");
+        return list;
+    }
+
+    Customer ICrud<Customer>.Read(Func<Customer, bool> filter)
+    {
+        Tools.LogManager.WriteToLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read with filter");
+        return customers.FirstOrDefault(c => filter(c));
     }
 }

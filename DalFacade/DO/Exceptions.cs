@@ -1,24 +1,17 @@
-﻿
+﻿using System;
 
-namespace DO
+namespace DO;
+
+[Serializable]
+public class DalDoesNotExistException : Exception
 {
-    [Serializable]
-    public class IdAlreadyExistsException : Exception
-    {
-        public IdAlreadyExistsException(string message) : base($"This Id Already Exists: {message}!") { }
-    }
-
-    [Serializable]
-    public class IdNotFoundException : Exception
-    {
-        public IdNotFoundException(string message) : base($"This Id Not Found: {message}!") { }
-    }
-
-    [Serializable]
-    public class NullItemException : Exception
-    {
-        public NullItemException(string message) : base($"This Null Item {message}!") { }
-    }
+    public DalDoesNotExistException(string? message) : base(message) { }
+    public DalDoesNotExistException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-
+[Serializable]
+public class DalAlreadyExistsException : Exception
+{
+    public DalAlreadyExistsException(string? message) : base(message) { }
+    public DalAlreadyExistsException(string message, Exception innerException) : base(message, innerException) { }
+}

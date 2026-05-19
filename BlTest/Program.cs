@@ -1,351 +1,430 @@
-﻿using BL.BlApi;
-using DalApi;
+﻿using BlApi;
+using BO;
 using System;
-using BL;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace BlTest
+namespace BLTest
 {
-    internal class Program
+    /// <summary>
+    /// תוכנית בדיקה אינטראקטיבית ליצירת הזמנות בשכבת הלוגיקה (BL)
+    /// מדמה זרימת עסקית שלמה: בחירת לקוח → הוספת מוצרים → ביצוע הזמנה
+    /// </summary>
+    class Program
     {
+        // שדה סטטי לממשק הלוגיקה הראשי
+        static readonly BlApi.IBl s_bl = BlApi.Factory.Get();
 
-        static readonly IBl s_bl = Factory.Get();
+        // משתנים גלובליים לאחזור נתונים
+        private static List<BO.Client> allClients = new List<BO.Client>();
+        private static List<BO.Product> allProducts = new List<BO.Product>();
 
         static void Main(string[] args)
         {
             try
             {
+                // אתחול נתונים מ-DAL
+                DalTest.Initalization.initialize();
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                Console.WriteLine("✅ נתונים אותחלו בהצלחה מ-DalTest\n");
 
-                DalTest.Initialization.Initialize();
+                // טעינת לקוחות ומוצרים
+                LoadData();
 
-                DisplayMainMenu();
+                // תפריט ראשי
+                ShowMainMenu();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Critical Error: {ex.Message}");
+                Console.WriteLine($"❌ שגיאה כללית: {ex.Message}");
             }
         }
 
-        #region Entity Input Logic (Returns BO Objects)
-        private static BO.Customer InputCustomer(BO.Customer? oldCustomer = null)
+        /// <summary>
+        /// טעינת נתונים גלוביים (לקוחות ומוצרים)
+        /// </summary>
+        private static void LoadData()
         {
-            // אם זה עדכון, נשמור על ה-ID המקורי (שבדרך כלל הוא תעודת זהות בלקוחות)
-            // אם זה לקוח חדש, נקלוט ID מהמשתמש
-            int id;
-            if (oldCustomer == null)
+            try
             {
-                Console.Write("Enter Customer ID (ID number): ");
-                int.TryParse(Console.ReadLine(), out id);
+                allClients = s_bl.IClient.GetAll().ToList();
+                allProducts = s_bl.IProduct.GetAll().ToList();
+
+                Console.WriteLine($"📦 נטענו {allProducts.Count} מוצרים");
+                Console.WriteLine($"👥 נטענו {allClients.Count} לקוחות\n");
             }
-            else
+            catch (Exception ex)
             {
-                id = oldCustomer.Id;
-                Console.WriteLine($"Updating Customer ID: {id}");
+                Console.WriteLine($"❌ שגיאה בטעינת נתונים: {ex.Message}");
             }
-
-            // 1. קליטת שם
-            Console.Write($"Enter Name (current: '{oldCustomer?.CustomerName}'): ");
-            string nameInput = Console.ReadLine() ?? "";
-            string name = string.IsNullOrWhiteSpace(nameInput) ? (oldCustomer?.CustomerName ?? "") : nameInput;
-
-            // 2. קליטת פלאפון
-            Console.Write($"Enter Phone Number (current: '{oldCustomer?.PhoneNumber}'): ");
-            string phoneInput = Console.ReadLine() ?? "";
-            string phone = string.IsNullOrWhiteSpace(phoneInput) ? (oldCustomer?.PhoneNumber ?? "") : phoneInput;
-
-            // 3. קליטת כתובת
-            Console.Write($"Enter Address (current: '{oldCustomer?.Address}'): ");
-            string addressInput = Console.ReadLine() ?? "";
-            string address = string.IsNullOrWhiteSpace(addressInput) ? (oldCustomer?.Address ?? "") : addressInput;
-
-            return new BO.Customer
-            {
-                Id = id,
-                CustomerName = name,
-                PhoneNumber = phone,
-                Address = address
-            };
         }
 
-        private static BO.Product InputProduct(BO.Product? oldProduct = null)
+        /// <summary>
+        /// תפריט ראשי של התוכנית
+        /// </summary>
+        private static void ShowMainMenu()
         {
-            // אם אנחנו בעדכון, נשמור על ה-ID המקורי. אם בהוספה, ה-ID יהיה 0.
-            int id = oldProduct?.Id ?? 0;
+            bool exitProgram = false;
 
-            // 1. קליטת שם
-            Console.Write($"Enter Product Name (current: '{oldProduct?.Name}'): ");
-            string nameInput = Console.ReadLine() ?? "";
-            string name = (string.IsNullOrWhiteSpace(nameInput)) ? (oldProduct?.Name ?? "Unknown") : nameInput;
-
-            // 2. קליטת מחיר
-            Console.Write($"Enter Price (current: {oldProduct?.Price}): ");
-            string priceInput = Console.ReadLine() ?? "";
-            double price;
-            if (string.IsNullOrWhiteSpace(priceInput))
-                price = oldProduct?.Price ?? 0;
-            else
-                double.TryParse(priceInput, out price);
-
-            // 3. קליטת כמות
-            Console.Write($"Enter Quantity in stock (current: {oldProduct?.Quantity}): ");
-            string qtyInput = Console.ReadLine() ?? "";
-            int quantity;
-            if (string.IsNullOrWhiteSpace(qtyInput))
-                quantity = oldProduct?.Quantity ?? 0;
-            else
-                int.TryParse(qtyInput, out quantity);
-
-            // 4. קליטת Enum (Category)
-            Console.WriteLine("Choose Category:");
-            // מדפיס למשתמש את האפשרויות: DOGS, FISH, CATS...
-            var categories = Enum.GetValues(typeof(BO.Categories));
-            foreach (var cat in categories)
+            while (!exitProgram)
             {
-                Console.WriteLine($" - {cat}");
-            }
+                Console.WriteLine("\n╔════════════════════════════════════════╗");
+                Console.WriteLine("║      תפריט ראשי - ניהול הזמנות        ║");
+                Console.WriteLine("╚════════════════════════════════════════╝");
+                Console.WriteLine("1. צור הזמנה חדשה");
+                Console.WriteLine("2. בדיקות מומחה (כפי שהיו)");
+                Console.WriteLine("0. יציאה מהתוכנית");
+                Console.WriteLine("────────────────────────────────────────");
+                Console.Write("בחר אפשרות: ");
 
-            Console.Write($"Enter Category (current: {oldProduct?.Category}): ");
-            string catInput = Console.ReadLine() ?? "";
-            BO.Categories category;
+                string choice = Console.ReadLine() ?? "0";
 
-            if (string.IsNullOrWhiteSpace(catInput))
-            {
-                category = oldProduct?.Category ?? BO.Categories.DOGS; // ברירת מחדל
-            }
-            else
-            {
-                // מנסה להמיר את הטקסט ל-Enum. אם המשתמש טעה, הוא יקבל את הערך הראשון (DOGS)
-                if (!Enum.TryParse(catInput, true, out category))
-                {
-                    Console.WriteLine("Invalid category, setting to DOGS by default.");
-                    category = BO.Categories.DOGS;
-                }
-            }
-
-            // החזרת האובייקט החדש/מעודכן
-            return new BO.Product
-            {
-                Id = id,
-                Name = name,
-                Price = price,
-                Quantity = quantity,
-                Category = category
-            };
-        }
-        private static BO.Sale InputSale(BO.Sale? oldSale = null)
-        {
-            // שמירה על ה-ID המקורי אם אנחנו בעדכון
-            int id = oldSale?.Id ?? 0;
-
-            // 1. קליטת Product ID
-            Console.Write($"Enter Product ID (current: {oldSale?.ProductId}): ");
-            string prodIdInput = Console.ReadLine() ?? "";
-            int productId = string.IsNullOrWhiteSpace(prodIdInput) ? (oldSale?.ProductId ?? 0) : int.Parse(prodIdInput);
-
-            // 2. קליטת כמות נדרשת
-            Console.Write($"Enter Required Quantity (current: {oldSale?.RequiredQuantity}): ");
-            string qtyInput = Console.ReadLine() ?? "";
-            int requiredQuantity = string.IsNullOrWhiteSpace(qtyInput) ? (oldSale?.RequiredQuantity ?? 0) : int.Parse(qtyInput);
-
-            // 3. קליטת מחיר מבצע
-            Console.Write($"Enter Discounted Price (current: {oldSale?.DiscountedPrice}): ");
-            string priceInput = Console.ReadLine() ?? "";
-            double discountedPrice = string.IsNullOrWhiteSpace(priceInput) ? (oldSale?.DiscountedPrice ?? 0) : double.Parse(priceInput);
-
-            // 4. חברי מועדון (y/n)
-            Console.Write($"Is for Club Members only? (y/n, current: {(oldSale?.IsForClubMembers == true ? "y" : "n")}): ");
-            string clubInput = Console.ReadLine()?.ToLower() ?? "";
-            bool isForClubMembers;
-            if (string.IsNullOrWhiteSpace(clubInput))
-                isForClubMembers = oldSale?.IsForClubMembers ?? false;
-            else
-                isForClubMembers = clubInput == "y";
-
-            // 5. תאריך התחלה
-            Console.Write($"Enter Sale Start Date (yyyy-mm-dd, current: {oldSale?.SaleStartDate:d}): ");
-            string startInput = Console.ReadLine() ?? "";
-            DateTime startDate;
-            if (string.IsNullOrWhiteSpace(startInput))
-                startDate = oldSale?.SaleStartDate ?? DateTime.Now;
-            else
-                DateTime.TryParse(startInput, out startDate);
-
-            // 6. תאריך סיום
-            Console.Write($"Enter Sale End Date (yyyy-mm-dd, current: {oldSale?.SaleEndDate:d}): ");
-            string endInput = Console.ReadLine() ?? "";
-            DateTime endDate;
-            if (string.IsNullOrWhiteSpace(endInput))
-                endDate = oldSale?.SaleEndDate ?? DateTime.Now.AddDays(7);
-            else
-                DateTime.TryParse(endInput, out endDate);
-
-            return new BO.Sale
-            {
-                Id = id,
-                ProductId = productId,
-                RequiredQuantity = requiredQuantity,
-                DiscountedPrice = discountedPrice,
-                IsForClubMembers = isForClubMembers,
-                SaleStartDate = startDate,
-                SaleEndDate = endDate
-            };
-        }
-        #endregion
-
-        #region Menus
-        private static void DisplayMainMenu()
-        {
-            bool exit = false;
-            while (!exit)
-            {
-                Console.WriteLine("\n======= BL Main Menu =======");
-                Console.WriteLine("1. Products Management");
-                Console.WriteLine("2. Customers Management");
-                Console.WriteLine("3. Sales Management");
-                Console.WriteLine("4. Exit");
-                Console.Write("Select an option: ");
-
-                switch (Console.ReadLine())
+                switch (choice)
                 {
                     case "1":
-                        // ציון מפורש של הטיפוסים <הישות, הממשק>
-                        DisplaySubMenu<BO.Product, BL.BlApi.IProduct>("Products", s_bl.Product);
+                        CreateNewOrder();
                         break;
-
                     case "2":
-                        DisplaySubMenu<BO.Customer, BL.BlApi.ICustomer>("Customers", s_bl.Customer);
+                        ShowExpertTestsMenu();
                         break;
-
-                    case "3":
-                        // אם יש לך מימוש ל-Sales
-                        DisplaySubMenu<BO.Sale, BL.BlApi.ISale>("Sales", s_bl.Sale);
+                    case "0":
+                        exitProgram = true;
+                        Console.WriteLine("👋 התוכנית הופסקה. להתראות!");
                         break;
-
-                    case "4":
-                        exit = true;
-                        break;
-
                     default:
-                        Console.WriteLine("Invalid choice.");
+                        Console.WriteLine("❌ בחירה לא תקינה, אנא בחר שוב");
                         break;
                 }
             }
         }
 
-        private static void DisplaySubMenu<T, TInterface>(string entityName, TInterface api)
-     where T : class
+        /// <summary>
+        /// זרימה שלמה של יצירת הזמנה: בחירת לקוח → הוספת מוצרים → ביצוע
+        /// </summary>
+        private static void CreateNewOrder()
         {
-            bool back = false;
-            while (!back)
+            try
             {
-                Console.WriteLine($"\n--- {entityName} (BO) Management ---");
-                Console.WriteLine("1. View All \n 2. Get by ID \n 3. Add \n 4. Update \n 5. Delete  \n6. Back");
-                string choice = Console.ReadLine() ?? "";
+                Console.WriteLine("\n╔════════════════════════════════════════╗");
+                Console.WriteLine("║        יצירת הזמנה חדשה        ║");
+                Console.WriteLine("╚════════════════════════════════════════╝\n");
 
+                // שלב 1: בחירת לקוח
+                var selectedClient = SelectClient();
+                if (selectedClient == null)
+                    return; // ביטול
+
+                // שלב 2: יצירת הזמנה ריקה
+                var order = new Order
+                {
+                    IsPreferredClient = selectedClient.IsClubMember,
+                    Products = new List<ProductInOrder>(),
+                    FinalPrice = 0
+                };
+
+                Console.WriteLine($"\n✅ בחרת לקוח: {selectedClient.Name} (ID: {selectedClient.Id})");
+                Console.WriteLine("────────────────────────────────────────\n");
+
+                // שלב 3: הוספת מוצרים
+                AddProductsToOrder(order);
+
+                // שלב 4: בדיקה אם יש מוצרים
+                if (order.Products.Count == 0)
+                {
+                    Console.WriteLine("⚠️  ההזמנה ריקה - לא בוצעה.");
+                    return;
+                }
+
+                // שלב 5: ביצוע ההזמנה
+                ExecuteOrder(order, selectedClient);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ שגיאה ביצירת הזמנה: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// בחירת לקוח מרשימה
+        /// </summary>
+        private static BO.Client SelectClient()
+        {
+            while (true)
+            {
                 try
                 {
-                    switch (choice)
+                    Console.WriteLine("╔─ בחר לקוח ─────────────────────────────╗");
+                    Console.WriteLine("║ רשימת לקוחות זמינים:         ║");
+                    Console.WriteLine("╚────────────────────────────────────────╝\n");
+
+                    // הצג רשימת לקוחות
+                    for (int i = 0; i < allClients.Count; i++)
                     {
-                        case "1": // View All
-                            if (api is BL.BlApi.IProduct productApi)
-                            {
-                                var items = productApi.ReadAll();
-                                foreach (var item in items) Console.WriteLine(item);
-                            }
-                            else if (api is BL.BlApi.ICustomer customerApi)
-                            {
-                                var items = customerApi.ReadAll();
-                                foreach (var item in items) Console.WriteLine(item);
-                            }
-                            else if (api is BL.BlApi.ISale saleApi)
-                            {
-                                var items = saleApi.ReadAll();
-                                foreach (var item in items) Console.WriteLine(item);
-                            }
-                            break;
-
-                        case "2": // Get by ID
-                            Console.Write($"Enter {entityName} ID: ");
-                            if (int.TryParse(Console.ReadLine(), out int id))
-                            {
-                                object? found = null;
-                                if (api is BL.BlApi.IProduct pApi) found = pApi.Read(id);
-                                else if (api is BL.BlApi.ICustomer cApi) found = cApi.Read(id);
-                                else if (api is BL.BlApi.ISale sApi) found = sApi.Read(id);
-                                Console.WriteLine(found ?? "Not found");
-                            }
-                            break;
-
-                        case "3": // Add
-                            if (api is BL.BlApi.IProduct pApiAdd)
-                            {
-                                var item = InputProduct();
-                                int newId = pApiAdd.Create(item);
-                                Console.WriteLine($"Created with ID: {newId}");
-                            }
-                            else if (api is BL.BlApi.ICustomer cApiAdd)
-                            {
-                                var item = InputCustomer();
-                                int newId = cApiAdd.Create(item);
-                                Console.WriteLine($"Created with ID: {newId}");
-                            }
-                            else if (api is BL.BlApi.ISale sApiAdd)
-                            {
-                                var item = InputSale();
-                                int newId = sApiAdd.Create(item);
-                                Console.WriteLine($"Created with ID: {newId}");
-                            }
-                            break;
-                        case "4": // Update
-                            Console.Write($"Enter {entityName} ID to update: ");
-                            if (int.TryParse(Console.ReadLine(), out int updateId))
-                            {
-                                if (api is BL.BlApi.IProduct pApiUpd)
-                                {
-                                    var oldProduct = pApiUpd.Read(updateId);
-                                    Console.WriteLine("Current data: " + oldProduct);
-                                    var updatedProduct = InputProduct(oldProduct); // שולחים את הישן כבסיס
-                                    pApiUpd.Update(updatedProduct);
-                                    Console.WriteLine("Product updated!");
-                                }
-                                else if (api is BL.BlApi.ICustomer cApiUpd)
-                                {
-                                    var oldCustomer = cApiUpd.Read(updateId);
-                                    Console.WriteLine("Current data: " + oldCustomer);
-                                    var updatedCustomer = InputCustomer(oldCustomer); // שולחים את הישן כבסיס
-                                    cApiUpd.Update(updatedCustomer);
-                                    Console.WriteLine("Customer updated!");
-                                }
-                                else if (api is BL.BlApi.ISale sApiUpd)
-                                {
-                                    var oldSale = sApiUpd.Read(updateId);
-                                    Console.WriteLine("Current data: " + oldSale);
-                                    var updatedSale = InputSale(oldSale); // שולחים את הישן כבסיס
-                                    sApiUpd.Update(updatedSale);
-                                    Console.WriteLine("Sale updated!");
-                                }
-                            }
-                            break;
-                        case "5": // Delete
-                            Console.Write($"Enter {entityName} ID to delete: ");
-                            if (int.TryParse(Console.ReadLine(), out int delId))
-                            {
-                                if (api is BL.BlApi.IProduct pApiDel) pApiDel.Delete(delId);
-                                else if (api is BL.BlApi.ICustomer cApiDel) cApiDel.Delete(delId);
-                                else if (api is BL.BlApi.ISale sApiDel) sApiDel.Delete(delId);
-                                Console.WriteLine("Deleted successfully.");
-                            }
-                            break;
-
-                        case "6": back = true; break;
+                        var client = allClients[i];
+                        Console.WriteLine($"{i + 1,2}. {client.Name} | ID: {client.Id} | טלפון: {client.Phone ?? "N/A"}");
                     }
+
+                    Console.WriteLine($"\n{allClients.Count + 1,2}. ביטול");
+                    Console.WriteLine("────────────────────────────────────────");
+                    Console.Write("בחר מספר לקוח: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > allClients.Count + 1)
+                    {
+                        Console.WriteLine("❌ בחירה לא תקינה");
+                        continue;
+                    }
+
+                    if (choice == allClients.Count + 1)
+                    {
+                        Console.WriteLine("🚫 ביטול בחירת לקוח");
+                        return null;
+                    }
+
+                    return allClients[choice - 1];
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    if (ex.InnerException != null) Console.WriteLine($"Inner: {ex.InnerException.Message}");
+                    Console.WriteLine($"❌ שגיאה: {ex.Message}");
                 }
             }
         }
-        #endregion
+
+        /// <summary>
+        /// תפריט הוספת מוצרים להזמנה
+        /// </summary>
+        private static void AddProductsToOrder(Order order)
+        {
+            bool finishAdding = false;
+
+            while (!finishAdding)
+            {
+                try
+                {
+                    Console.WriteLine("\n╔─ הוספת מוצרים ─────────────────────────╗");
+                    Console.WriteLine("║ רשימת מוצרים זמינים:        ║");
+                    Console.WriteLine("╚────────────────────────────────────────╝\n");
+
+
+                    // הצג רשימת מוצרים
+                    foreach (var prod in allProducts)
+                    {
+                        Console.WriteLine($"ID: {prod.Id} | שם: {prod.Name} | מחיר: ${prod.Price} | מלאי: {prod.Stock}");
+                    }
+
+                    Console.WriteLine("\n────────────────────────────────────────");
+                    Console.WriteLine("• הקלד ID של מוצר להוסיף");
+                    Console.WriteLine("• הקלד 0 לסיום הוספת מוצרים");
+                    Console.Write("בחר: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int productId))
+                    {
+                        Console.WriteLine("❌ קלט לא תקין");
+                        continue;
+                    }
+
+                    if (productId == 0)
+                    {
+                        finishAdding = true;
+                        break;
+                    }
+
+                    // בדוק אם המוצר קיים
+                    var product = allProducts.FirstOrDefault(p => p.Id == productId);
+                    if (product == null)
+                    {
+                        Console.WriteLine($"❌ מוצר עם ID {productId} לא קיים");
+                        continue;
+                    }
+
+                    // קבל כמות
+                    Console.Write($"הקלד כמות להוספה: ");
+                    if (!int.TryParse(Console.ReadLine(), out int quantity))
+                    {
+                        Console.WriteLine("❌ כמות לא תקינה");
+                        continue;
+                    }
+
+                    // הוסף מוצר להזמנה דרך BL
+                    var sales = s_bl.IOrder.AddProductToOrder(order, productId, quantity);
+
+                    Console.WriteLine($"\n✅ מוצר נוסף בהצלחה!");
+                    Console.WriteLine($"   כמות: {quantity}");
+                    Console.WriteLine($"   מבצעים זמינים: {sales.Count}");
+
+                    // הדפס סיכום הזמנה עדכני
+                    PrintOrderSummary(order);
+
+                    Console.WriteLine("\nרוצה להוסיף עוד מוצרים? (כן = התחל מחדש, לא = 0)");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ שגיאה: {ex.Message}");
+                    Console.WriteLine("חוזר לתפריט הוספת מוצרים...\n");
+                }
+            }
+        }
+
+        /// <summary>
+        /// הדפסת סיכום הזמנה בזמן בנייתה
+        /// </summary>
+        private static void PrintOrderSummary(Order order)
+        {
+            Console.WriteLine("\n┌─ סיכום הזמנה עדכני ───────────────────────┐");
+            Console.WriteLine($"│ מספר מוצרים בהזמנה: {order.Products.Count}");
+            Console.WriteLine("│");
+
+            foreach (var product in order.Products)
+            {
+                Console.WriteLine($"│ 📦 {product.Name}");
+                Console.WriteLine($"│    ID: {product.ProductId} | כמות: {product.Quantity_in_order}");
+                Console.WriteLine($"│    מחיר בסיס: ${product.BasePrice} | מחיר סופי: ${product.FinalPrice_in_total}");
+                if (product.Sales?.Count > 0)
+                {
+                    Console.WriteLine($"│  🎁 מבצעים: {product.Sales.Count}");
+                }
+                Console.WriteLine("│");
+            }
+
+            Console.WriteLine($"│ 💰 סה\"כ הזמנה: ${order.FinalPrice}");
+            Console.WriteLine("└─────────────────────────────────────────────┘");
+        }
+
+        /// <summary>
+        /// ביצוע ההזמנה והדפסת דוח סופי
+        /// </summary>
+        private static void ExecuteOrder(Order order, BO.Client client)
+        {
+            try
+            {
+                Console.WriteLine("\n╔════════════════════════════════════════╗");
+                Console.WriteLine("║     ביצוע ההזמנה║");
+                Console.WriteLine("╚════════════════════════════════════════╝\n");
+
+                // שמור מלאיים לפני ביצוע
+                var productStocksBefore = new Dictionary<int, int>();
+                foreach (var product in order.Products)
+                {
+                    var dbProduct = s_bl.IProduct.Get(product.ProductId);
+                    if (dbProduct != null)
+                        productStocksBefore[product.ProductId] = dbProduct.Stock;
+                }
+
+                // בצע הזמנה
+                s_bl.IOrder.DoOrder(order);
+
+                Console.WriteLine("✅ ההזמנה בוצעה בהצלחה!\n");
+
+                // הדפס דוח סופי מפורט
+                PrintFinalReport(order, client, productStocksBefore);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ שגיאה בביצוע הזמנה: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// הדפסת דוח סופי של ההזמנה
+        /// </summary>
+        private static void PrintFinalReport(Order order, BO.Client client, Dictionary<int, int> stocksBefore)
+        {
+            Console.WriteLine("┌─ דוח הזמנה סופי ──────────────────────────┐");
+            Console.WriteLine($"│ לקוח: {client.Name}");
+            Console.WriteLine($"│ ID לקוח: {client.Id}");
+            Console.WriteLine("│");
+            Console.WriteLine("│ פרטי מוצרים בהזמנה:");
+            Console.WriteLine("│");
+
+            int totalSalesUsed = 0;
+
+            foreach (var product in order.Products)
+            {
+                var dbProduct = s_bl.IProduct.Get(product.ProductId);
+                int stockAfter = dbProduct?.Stock ?? 0;
+                int stockReduction = stocksBefore.ContainsKey(product.ProductId)
+                    ? stocksBefore[product.ProductId] - stockAfter
+                    : 0;
+
+                Console.WriteLine($"│ 📦 {product.Name}");
+                Console.WriteLine($"│    ID מוצר: {product.ProductId}");
+                Console.WriteLine($"│    כמות הורה: {product.Quantity_in_order}");
+                Console.WriteLine($"│    מחיר בסיס ליחידה: ${product.BasePrice}");
+                Console.WriteLine($"│    מחיר סופי: ${product.FinalPrice_in_total:F2}");
+
+                if (product.Sales != null && product.Sales.Count > 0)
+                {
+                    Console.WriteLine($"│    🎁 מבצעים שהשתמשו: {product.Sales.Count}");
+                    totalSalesUsed += product.Sales.Count;
+                    foreach (var sale in product.Sales)
+                    {
+                        Console.WriteLine($"│       └─ הנחה {sale.Price_per_one * 100:F0}% (קנייה מינימום: {sale.Amount_to_sale} יחידות)");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"│    🎁 לא היו מבצעים");
+                }
+
+                Console.WriteLine($"│    📉 הוריד מהמלאי: {stockReduction} יחידות");
+                Console.WriteLine("│");
+            }
+
+            Console.WriteLine($"│ ═════════════════════════════════════════");
+            Console.WriteLine($"│ 💰 סה\"כ מחיר סופי: ${order.FinalPrice:F2}");
+            Console.WriteLine($"│ 🎁 סה\"כ מבצעים שנוצלו: {totalSalesUsed}");
+            Console.WriteLine($"│ ═════════════════════════════════════════");
+            Console.WriteLine("└────────────────────────────────────────────┘");
+
+            Console.WriteLine("\n✅ ההזמנה סוגרה בהצלחה!");
+            Console.WriteLine("חוזר לתפריט ראשי...");
+            Console.WriteLine("\nלחץ Enter כדי להמשיך...");
+            Console.ReadLine();
+        }
+
+        /// <summary>
+        /// תפריט בדיקות מומחה (הקוד המקורי הפשוט יותר)
+        /// </summary>
+        private static void ShowExpertTestsMenu()
+        {
+            bool backToMain = false;
+
+            while (!backToMain)
+            {
+                Console.WriteLine("\n╔════════════════════════════════════════╗");
+                Console.WriteLine("║      בדיקות מומחה (Advanced Tests)  ║");
+                Console.WriteLine("╚════════════════════════════════════════╝");
+                Console.WriteLine("1. בדיקות הזמנות");
+                Console.WriteLine("2. בדיקות מוצרים");
+                Console.WriteLine("3. בדיקות לקוחות");
+                Console.WriteLine("4. בדיקות מבצעים");
+                Console.WriteLine("0. חזור לתפריט ראשי");
+                Console.WriteLine("────────────────────────────────────────");
+                Console.Write("בחר אפשרות: ");
+
+                string choice = Console.ReadLine() ?? "0";
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.WriteLine("\n📋 בדיקות הזמנות - להשלמה בעתיד");
+                        break;
+                    case "2":
+                        Console.WriteLine("\n📋 בדיקות מוצרים - להשלמה בעתיד");
+                        break;
+                    case "3":
+                        Console.WriteLine("\n📋 בדיקות לקוחות - להשלמה בעתיד");
+                        break;
+                    case "4":
+                        Console.WriteLine("\n📋 בדיקות מבצעים - להשלמה בעתיד");
+                        break;
+                    case "0":
+                        backToMain = true;
+                        break;
+                    default:
+                        Console.WriteLine("❌ בחירה לא תקינה");
+                        break;
+                }
+            }
+        }
     }
 }

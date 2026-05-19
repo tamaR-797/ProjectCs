@@ -1,8 +1,20 @@
 {
   "version": 2,
-  "dgSpecHash": "qb1oGAiIz1A=",
-  "success": true,
-  "projectFilePath": "C:\\Users\\suser\\source\\repos\\ProjectCs\\DalTest\\DalTest.csproj",
+  "dgSpecHash": "1NObvifiBtM=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj",
   "expectedPackageFiles": [],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1104",
+      "level": "Error",
+      "message": "Unable to find project 'C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\ClassLibrary1\\DalXml.csproj'. Check that the project reference is valid and that the project file exists.",
+      "projectPath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj",
+      "filePath": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\DalTest\\DalTest.csproj",
+      "libraryId": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\ClassLibrary1\\DalXml.csproj",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }
