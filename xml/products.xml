@@ -1,3 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ArrayOfProduct>
+<ArrayOfProduct xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Product>
+    <id>1027</id>
+    <category>PERSONAL_CARE</category>
+    <product_name>Printer</product_name>
+    <price>200</price>
+    <amount_in_stock>10</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1028</id>
+    <category>CLEANING</category>
+    <product_name>External Hard Drive</product_name>
+    <price>120</price>
+    <amount_in_stock>25</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1014</id>
+    <category>PERSONAL_CARE</category>
+    <product_name>Monitor</product_name>
+    <price>250</price>
+    <amount_in_stock>14</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1029</id>
+    <category>KITCHEN</category>
+    <product_name>mixer</product_name>
+    <price>1000</price>
+    <amount_in_stock>38</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1010</id>
+    <category>PERSONAL_CARE</category>
+    <product_name>phone</product_name>
+    <price>700</price>
+    <amount_in_stock>49</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1009</id>
+    <category>PERSONAL_CARE</category>
+    <product_name>Laptop</product_name>
+    <price>1500</price>
+    <amount_in_stock>264</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1011</id>
+    <category>ENTERTAINMENT</category>
+    <product_name>headphones</product_name>
+    <price>150</price>
+    <amount_in_stock>100</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1012</id>
+    <category>PERSONAL_CARE</category>
+    <product_name>Smartwatch</product_name>
+    <price>300</price>
+    <amount_in_stock>4</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1013</id>
+    <category>ENTERTAINMENT</category>
+    <product_name>Tablet</product_name>
+    <price>400</price>
+    <amount_in_stock>14</amount_in_stock>
+  </Product>
 </ArrayOfProduct>

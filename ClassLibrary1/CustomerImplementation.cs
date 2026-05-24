@@ -40,9 +40,9 @@ namespace Dal
         public int Create(Customer item)
         {
             LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called create with: " + item);
-            if (customersList.Any(c => c.id == item.id))
+            if (customersList.Any(c => c.id == item.id)) 
             {
-                LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called create with: " + item + "faild: exists");
+                LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called create with: " + item +"faild: exists");
                 throw new DalAlreadyExistsException($"Customer with ID {item.id} already exists.");
             }
             customersList.Add(item);
@@ -62,8 +62,8 @@ namespace Dal
                 LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted successfully");
                 return;
             }
-            LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete faild : " + id + " does not exists");
-            throw new DalDoesNotExistException("couldent delete id: " + id + " does not exists");
+            LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete faild : "+id+" does not exists");
+            throw new DalDoesNotExistException("couldent delete id: "+id+" does not exists");
 
         }
 
@@ -118,7 +118,7 @@ namespace Dal
         private void SaveToFile()
         {
             try
-            {
+            { 
                 using (StreamWriter writer = new StreamWriter(fileName))
                 {
                     customers.Serialize(writer, customersList);

@@ -9,18 +9,18 @@ namespace Dal
 {
     internal static class Config
     {
-
-        private static string fileName = "../xml/data-config.xml";
-        private static XElement dataConfig = XElement.Load(fileName);
-
+       
+        private  static string fileName = "../xml/data-config.xml";
+        private  static XElement dataConfig=XElement.Load(fileName);
+         
         private static int productId;
 
         public static int GetProductId
         {
-            get
+            get 
             {
-                int currentProId = int.Parse(dataConfig.Element("ProductNum").Value);
-                dataConfig.Element("ProductNum").SetValue((currentProId + 1).ToString());
+                int currentProId = int.Parse(dataConfig.Element("ProductNum").Value); 
+                dataConfig.Element("ProductNum").SetValue((currentProId+1).ToString());
                 dataConfig.Save(fileName);
                 return currentProId;
             }

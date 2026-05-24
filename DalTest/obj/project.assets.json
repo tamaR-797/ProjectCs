@@ -26,6 +26,20 @@
           "bin/placeholder/DalList.dll": {}
         }
       },
+      "DalXml/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "DalFacade": "1.0.0",
+          "Tools": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DalXml.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DalXml.dll": {}
+        }
+      },
       "Tools/1.0.0": {
         "type": "project",
         "compile": {
@@ -48,6 +62,11 @@
       "path": "../DalList/DalList.csproj",
       "msbuildProject": "../DalList/DalList.csproj"
     },
+    "DalXml/1.0.0": {
+      "type": "project",
+      "path": "../ClassLibrary1/DalXml.csproj",
+      "msbuildProject": "../ClassLibrary1/DalXml.csproj"
+    },
     "Tools/1.0.0": {
       "type": "project",
       "path": "../Tools/Tools.csproj",
@@ -56,9 +75,9 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\ClassLibrary1\\DalXml.csproj",
       "DalFacade >= 1.0.0",
       "DalList >= 1.0.0",
+      "DalXml >= 1.0.0",
       "Tools >= 1.0.0"
     ]
   },
@@ -143,16 +162,5 @@
         "runtimeIdentifierGraphPath": "c:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1104",
-      "level": "Error",
-      "message": "Unable to find project 'C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\ClassLibrary1\\DalXml.csproj'. Check that the project reference is valid and that the project file exists.",
-      "libraryId": "C:\\Users\\suser\\Documents\\GitHub\\ProjectCs\\ClassLibrary1\\DalXml.csproj",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  }
 }

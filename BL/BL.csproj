@@ -9,6 +9,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<RootNamespace />
 	</PropertyGroup>
 

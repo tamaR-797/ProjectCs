@@ -24,6 +24,6 @@ namespace Dal
 
         public ICustomer Customer => new CustomerImplementation();
     }
+    
 
-
-}
+    }

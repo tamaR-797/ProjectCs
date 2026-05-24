@@ -29,13 +29,13 @@ namespace UI_
 
         private void LoadCategories()
         {
-            categoryComboBox.DataSource = Enum.GetValues(typeof(ElectricalApplianceCategory));
+            categoryComboBox.DataSource = Enum.GetValues(typeof(Categories));
             categoryComboBox.SelectedIndex = 0;
 
-            categoryComboBoxUpdate.DataSource = Enum.GetValues(typeof(ElectricalApplianceCategory));
+            categoryComboBoxUpdate.DataSource = Enum.GetValues(typeof(Categories));
             categoryComboBoxUpdate.SelectedIndex = 0;
 
-            categoryFilterComboBox.DataSource = Enum.GetValues(typeof(ElectricalApplianceCategory));
+            categoryFilterComboBox.DataSource = Enum.GetValues(typeof(Categories));
             categoryFilterComboBox.SelectedIndex = 0;
         }
 
@@ -72,7 +72,7 @@ namespace UI_
                     bl.IProduct.Create(new BO.Product
                     {
                         Name = nameTextBox.Text,
-                        category = (ElectricalApplianceCategory)categoryComboBox.SelectedItem,
+                        category = (Categories)categoryComboBox.SelectedItem,
                         Price = price,
                         Stock = stock
                     });
@@ -210,7 +210,7 @@ namespace UI_
                     {
                         Id = id,
                         Name = upNameTextBox.Text,
-                        category = (ElectricalApplianceCategory)categoryComboBoxUpdate.SelectedItem,
+                        category = (Categories)categoryComboBoxUpdate.SelectedItem,
                         Price = price,
                         Stock = stock
                     });
@@ -291,7 +291,7 @@ namespace UI_
             try
             {
                 var selectedCategory = categoryFilterComboBox.SelectedItem;
-                if (selectedCategory is ElectricalApplianceCategory category)
+                if (selectedCategory is Categories category)
                 {
                     Func<Product, bool> filter = p => p.category == category;
                     var filteredProducts = bl.IProduct.GetAll(filter).ToList();
