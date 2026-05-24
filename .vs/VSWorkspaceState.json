@@ -1,13 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\DalFacade",
-    "\\DalFacade\\DalApi",
-    "\\DalFacade\\DO",
     "\\DalList",
-    "\\DalTest",
-    "\\Tools"
+    "\\DalTest"
   ],
-  "SelectedNode": "\\Tools\\LogManager.cs",
+  "SelectedNode": "\\DalTest\\Program.cs",
   "PreviewInSolutionExplorer": false
 }

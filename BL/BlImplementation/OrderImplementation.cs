@@ -23,12 +23,54 @@ namespace BlImplementation
 
             productInOrder.Sales = relevantSales.OrderBy(sale => sale.amount_to_sale).Select(sale => sale.convert()).Select(s=> new SaleInProduct() { IsForAllClients = !s.to_club ,Price_per_one = s.cost_per_one, Amount_to_sale = s.amount_to_sale , SaleId = s.Id }).ToList();
         }
+        //public void CalcTotalPriceForProduct(BO.ProductInOrder productInOrder)
+        //{
+        //    int remainingQuantity = productInOrder.Quantity_in_order;
+        //    double totalPrice = 0;
 
+        //    if (productInOrder.Sales != null)
+        //    {
+        //        // מיון המבצעים מהזול ליקר
+        //        var sortedSales = productInOrder.Sales
+        //            .OrderBy(sale => sale.Price_per_one)
+        //            .ToList();
+
+        //        foreach (var sale in sortedSales)
+        //        {
+        //            if (remainingQuantity < sale.Amount_to_sale)
+        //            {
+        //                continue;
+        //            }
+
+        //            int timesUsed = remainingQuantity / sale.Amount_to_sale;
+
+        //            // ---- התיקון המרכזי כאן ----
+        //            // אם 120 ש"ח זה מחיר ה"חבילה" כולה, לא מכפילים ב-Amount_to_sale!
+        //            totalPrice += timesUsed * sale.Price_per_one;
+
+        //            // (אם ה-120 ש"ח היה אמור להיות לפריט בודד והתוצאה 1583 היא נכונה מבחינתך, 
+        //            // השאירי את השורה המקורית: totalPrice += timesUsed * sale.Amount_to_sale * sale.Price_per_one;)
+
+        //            remainingQuantity -= timesUsed * sale.Amount_to_sale;
+
+        //            if (remainingQuantity == 0)
+        //            {
+        //                break;
+        //            }
+        //        }
+        //    }
+
+        //    // חישוב השארית לפי מחיר הבסיס (שמלה אחת ב-143 ש"ח)
+        //    totalPrice += remainingQuantity * productInOrder.BasePrice;
+
+        //    // עדכון המחיר הסופי במסך
+        //    productInOrder.FinalPrice_in_total = totalPrice;
+        //}
         public void CalcTotalPriceForProduct(BO.ProductInOrder productInOrder)
         {
-            int remainingQuantity = productInOrder.Quantity_in_order; 
-            double totalPrice = 0;                          
-            List<BO.SaleInProduct> appliedSales = [];       
+            int remainingQuantity = productInOrder.Quantity_in_order;
+            double totalPrice = 0;
+            List<BO.SaleInProduct> appliedSales = [];
 
             if (productInOrder.Sales != null)
             {
@@ -59,7 +101,7 @@ namespace BlImplementation
             productInOrder.FinalPrice_in_total = totalPrice;
             productInOrder.Sales = appliedSales;
         }
-       
+
         public void CalcTotalPrice(Order order)
         {
             order.FinalPrice = order.Products.Select(product => { CalcTotalPriceForProduct(product); return product.FinalPrice_in_total; }).Sum();

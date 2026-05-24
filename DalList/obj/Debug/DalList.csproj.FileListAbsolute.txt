@@ -79,3 +79,17 @@ Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalList\obj\Debug\refint\DalList.dll
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalList\obj\Debug\DalList.pdb
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalList\obj\Debug\ref\DalList.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalList.deps.json
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalList.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalList.pdb
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.csproj.AssemblyReference.cache
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.AssemblyInfoInputs.cache
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.AssemblyInfo.cs
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.csproj.CoreCompileInputs.cache
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.sourcelink.json
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.csproj.Up2Date
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\refint\DalList.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.pdb
+C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\ref\DalList.dll

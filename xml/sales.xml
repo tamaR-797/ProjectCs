@@ -117,4 +117,13 @@
     <start_date>2026-05-07T15:12:54.582</start_date>
     <end_date>2026-05-25T15:12:54.582</end_date>
   </sale>
+  <sale>
+    <id>56</id>
+    <product_id>1030</product_id>
+    <amount_to_sale>12</amount_to_sale>
+    <count_to_sale>120</count_to_sale>
+    <to_club>false</to_club>
+    <start_date>2026-05-17T20:27:53.043</start_date>
+    <end_date>2026-05-31T20:27:53.0440719+03:00</end_date>
+  </sale>
 </ArrayOfSale>

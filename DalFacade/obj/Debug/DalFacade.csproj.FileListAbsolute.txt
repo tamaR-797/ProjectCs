@@ -67,3 +67,15 @@ Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalFacade\obj\Debug\refint\DalFacade.dll
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalFacade\obj\Debug\DalFacade.pdb
 Z:\יד תשפו\הלוי דבורה\c#\פרויקט\perfectProject\DotNet2026_7532_7156\DalFacade\obj\Debug\ref\DalFacade.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalFacade.deps.json
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalFacade.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\bin\DalFacade.pdb
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.AssemblyInfoInputs.cache
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.AssemblyInfo.cs
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.csproj.CoreCompileInputs.cache
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.sourcelink.json
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\refint\DalFacade.dll
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\DalFacade.pdb
+C:\Users\suser\Documents\GitHub\ProjectCs\DalFacade\obj\Debug\ref\DalFacade.dll
