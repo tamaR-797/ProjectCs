@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfCustomer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Customer>
-    <id>4</id>
-    <customer_name>michal</customer_name>
-    <customer_adress>hh</customer_adress>
-    <customer_phon>055</customer_phon>
-    <isClubMember>true</isClubMember>
-  </Customer>
-  <Customer>
     <id>6254</id>
     <customer_name>Michal</customer_name>
     <customer_adress>Modiin Ilit</customer_adress>
@@ -180,6 +173,48 @@
     <customer_name>add</customer_name>
     <customer_adress>kjjk</customer_adress>
     <customer_phon>5454</customer_phon>
+    <isClubMember>true</isClubMember>
+  </Customer>
+  <Customer>
+    <id>1</id>
+    <customer_name>חמ</customer_name>
+    <customer_adress>נעךנט</customer_adress>
+    <customer_phon>089520525</customer_phon>
+    <isClubMember>true</isClubMember>
+  </Customer>
+  <Customer>
+    <id>34456</id>
+    <customer_name>אא</customer_name>
+    <customer_adress>לוט</customer_adress>
+    <customer_phon>05564</customer_phon>
+    <isClubMember>false</isClubMember>
+  </Customer>
+  <Customer>
+    <id>36</id>
+    <customer_name>אא</customer_name>
+    <customer_adress>לוט</customer_adress>
+    <customer_phon>05564</customer_phon>
+    <isClubMember>false</isClubMember>
+  </Customer>
+  <Customer>
+    <id>2346</id>
+    <customer_name>fgj</customer_name>
+    <customer_adress>xvj</customer_adress>
+    <customer_phon>xgjv</customer_phon>
+    <isClubMember>false</isClubMember>
+  </Customer>
+  <Customer>
+    <id>4</id>
+    <customer_name>michal</customer_name>
+    <customer_adress>hh</customer_adress>
+    <customer_phon>055</customer_phon>
+    <isClubMember>false</isClubMember>
+  </Customer>
+  <Customer>
+    <id>12</id>
+    <customer_name>dd</customer_name>
+    <customer_adress>dh</customer_adress>
+    <customer_phon>055</customer_phon>
     <isClubMember>true</isClubMember>
   </Customer>
 </ArrayOfCustomer>

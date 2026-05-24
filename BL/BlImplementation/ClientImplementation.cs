@@ -30,7 +30,7 @@ namespace BlImplementation
             }
         }
 
-
+   
         void Icrud<Client>.Delete(int id)
         {
             try
@@ -83,14 +83,14 @@ namespace BlImplementation
             }
         }
 
-
+    
 
         Client Icrud<Client>.Get(Func<Client, bool> filter)
         {
-            return GetAll(filter).FirstOrDefault() ?? throw new BO.BlDoesNotExistException("No client found matching the provided filter.");
+           return GetAll(filter).FirstOrDefault() ?? throw new BO.BlDoesNotExistException("No client found matching the provided filter.");
         }
 
-
+     
 
         IEnumerable<Client> GetAll(Func<Client, bool> filter = null)
         {
@@ -98,7 +98,7 @@ namespace BlImplementation
             {
                 var dalCustomers = _dal.Customer.ReadAll();
                 if (filter == null)
-                    return dalCustomers.Select(c => c.convert());
+                    return dalCustomers.Select(c=>c.convert());
                 var boClients = dalCustomers.Select(c => c.convert());
                 return boClients.Where(filter).ToList();
             }

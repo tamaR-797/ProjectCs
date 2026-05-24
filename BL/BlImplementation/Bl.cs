@@ -1,17 +1,21 @@
 ﻿using BlApi;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BlImplementation
 {
-    internal class BL : IBl
+    internal class BL : BlApi.IBl
     {
-        public ISale ISale => new SaleImplementation();
+        public BlApi.ISale ISale  => new SaleImplementation();
 
-        public IProduct IProduct => new ProductImplementation();
+        public BlApi.IProduct IProduct => new ProductImplementation();
 
-        public IClient IClient => new ClientImplementation();
+        public BlApi.IClient IClient => new ClientImplementation();
 
-        public IOrder IOrder => new OrderImplementation();
+        public BlApi.IOrder IOrder => new OrderImplementation();
 
     }
 }

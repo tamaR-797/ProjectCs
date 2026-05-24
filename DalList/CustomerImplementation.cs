@@ -20,13 +20,13 @@ public class CustomerImplementation : ICustomer
 
         if (q.FirstOrDefault() == null)
         {
-            LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " id accepted not exist");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " id accepted not exist");
             throw new DalDoesNotExistException($"Customer with ID {id} does not exist.");
         }
         else
 
         {
-           LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " end read call found customer");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " end read call found customer");
             return q.FirstOrDefault();
         }
 
@@ -34,17 +34,17 @@ public class CustomerImplementation : ICustomer
 
     public int Create(Customer customer)
     {
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " called create with " + customer);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, " called create with " + customer);
 
         // צריך לעשות רק ב customer
         bool exist = customers.Any(c => c.id == customer.id);
         if (exist)
         {
-            LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception id already exists");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception id already exists");
             throw new DalAlreadyExistsException($"Customer with ID {customer.id} already exists.");
         }
         customers.Add(customer);
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "created successfully");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "created successfully");
         return customer.id;
 
 
@@ -52,7 +52,7 @@ public class CustomerImplementation : ICustomer
 
     public void Delete(int id)
     {
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete with id : " + id);
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called delete with id : " + id);
 
         var q = from c in customers
                 where c.id == id
@@ -63,17 +63,17 @@ public class CustomerImplementation : ICustomer
 
         if (s1 == null)
         {
-            LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception no id was found to delete");
+            Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "exception no id was found to delete");
             throw new DalDoesNotExistException($"Customer with ID {id} does not exist and cannot be deleted.");
         }
         customers.Remove(s1);
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted successfully");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "deleted successfully");
 
     }
 
     public void Update(Customer customer)
     {
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called update ");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called update ");
         Delete(customer.id);
 
         customers.Add(customer);
@@ -82,7 +82,7 @@ public class CustomerImplementation : ICustomer
 
     List<Customer> ICrud<Customer>.ReadAll(Func<Customer, bool>? filter)
     {
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read all with filter");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read all with filter");
 
         List<Customer> list = new List<Customer>();
 
@@ -96,13 +96,13 @@ public class CustomerImplementation : ICustomer
 
         }
 
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "end read all call found " + list.Count() + " customers");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "end read all call found " + list.Count() + " customers");
         return list;
     }
 
     Customer ICrud<Customer>.Read(Func<Customer, bool> filter)
     {
-        LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read with filter");
+        Tools.LogManager.WriteLog(MethodBase.GetCurrentMethod().Name, MethodBase.GetCurrentMethod().DeclaringType.FullName, "called read with filter");
         return customers.FirstOrDefault(c => filter(c));
     }
 }

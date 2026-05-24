@@ -48,7 +48,7 @@ namespace BlImplementation
             try
             {
                 var dalProducts = _dal.Product.ReadAll();
-                if (filter == null)
+                if(filter == null)
                     return dalProducts.Select(p => p.convert()).ToList();
                 return dalProducts.Select(p => p.convert()).Where(filter).ToList();
             }

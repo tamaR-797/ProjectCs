@@ -11,14 +11,14 @@ namespace DalTest;
 internal class Program
 {
 
-    private static IDal s_dal = Factory.Get;
+    private static IDal s_dal =Factory.Get; 
 
     static void Main(string[] args)
     {
         Console.WriteLine("to initializ type yes");
         string input = Console.ReadLine();
         if (input.ToLower() == "yes")
-            Initalization.initialize();
+            Initializatation.initialize();
         try
         {
             while (true)
@@ -37,13 +37,13 @@ internal class Program
                         Tools.LogManager.DeleteOldLogFolders();
                         break;
                     case "1":
-                        ShowCrudMenu(s_dal.Sale, "sale");
+                        ShowCrudMenu(s_dal.Sale,"sale");
                         break;
                     case "2":
-                        ShowCrudMenu(s_dal.Product, "prduct");
+                        ShowCrudMenu(s_dal.Product,"prduct");
                         break;
                     case "3":
-                        ShowCrudMenu(s_dal.Customer, "customer");
+                        ShowCrudMenu(s_dal.Customer,"customer");
                         break;
                     default:
                         Console.WriteLine("Invalid choice. Try again.");
@@ -60,9 +60,8 @@ internal class Program
     /// <summary>
     /// show the menu of entity
     /// </summary>
-    private static void DisplayMainMenu()
-    {
-        Console.WriteLine("wellcome to our electronic store");
+        private static void DisplayMainMenu()
+    {   Console.WriteLine("wellcome to our electronic store");
         Console.WriteLine("Main Menu:");
         Console.WriteLine("0. Delet old logs");
         Console.WriteLine("1. Sale");
@@ -79,7 +78,7 @@ internal class Program
     /// <param name="name">the name of the entity (for visualety)</param>
     private static void ShowCrudMenu<T>(ICrud<T> inter, string name)
     {
-
+       
         Console.WriteLine($"\n CRUD Menu:");
         Console.WriteLine("1. Create");
         Console.WriteLine("2. Read");
@@ -96,13 +95,13 @@ internal class Program
                 CreateEntity(inter, name);
                 break;
             case "2":
-                ReadEntity(inter, name);
+                ReadEntity(inter,name);
                 break;
             case "3":
                 ReadAllEntity(inter, name);
                 break;
             case "4":
-                UpdateEntity(inter, name);
+               UpdateEntity(inter, name);
                 break;
             case "5":
                 DeleteEntity(inter, name);
@@ -117,7 +116,7 @@ internal class Program
     private static void ReadAllEntity<T>(ICrud<T> inter, string name)
     {
         var li = inter.ReadAll();
-        Console.WriteLine("the list of " + name + "s :");
+        Console.WriteLine("the list of "+name+"s :");
         li.ForEach(x => Console.WriteLine(x.ToString()));
     }
     private static void CreateEntity<T>(ICrud<T> inter, string name)
@@ -125,18 +124,18 @@ internal class Program
 
         if (inter is ICrud<Sale>)
         {
-            ISale saleInter = (ISale)inter;
+            ISale saleInter= (ISale)inter;
             Sale sale = GetSaleFromInput();
             saleInter.Create(sale);
         }
         else if (inter is ICrud<Product>)
-        {
+        {   
             IProduct productInter = (IProduct)inter;
             var product = GetProductFromInput();
             productInter.Create(product);
         }
         else if (inter is ICrud<Customer>)
-        {
+        {   
             ICustomer customerInter = (ICustomer)inter;
             var customer = GetCustomerFromInput();
             customerInter.Create(customer);
@@ -147,7 +146,7 @@ internal class Program
         }
     }
 
-
+    
 
     private static Sale GetSaleFromInput()
     {
@@ -172,7 +171,7 @@ internal class Program
         int price = int.Parse(Console.ReadLine()!);
         int amountInStock = int.Parse(Console.ReadLine()!);
 
-        return new Product(id, category, productName, price, amountInStock);
+        return new Product(id ,category, productName, price, amountInStock);
     }
 
     private static Customer GetCustomerFromInput()
@@ -192,14 +191,13 @@ internal class Program
         Console.Write($"Enter ID to read {name}: ");
         int input = int.Parse(Console.ReadLine());
         Console.WriteLine($"Reading {name} with ID: {input}");
-        var item = inter.Read(input);
+        var item =inter.Read(input);
         Console.WriteLine(item.ToString());
     }
 
     private static void UpdateEntity<T>(ICrud<T> inter, string name)
-    {
-        Console.Write($"Enter ID to update {name}: ");
-        int id = int.Parse(Console.ReadLine());
+    {   Console.Write($"Enter ID to update {name}: ");
+        int id =int.Parse(Console.ReadLine());
 
         if (inter is ICrud<Sale>)
         {
@@ -234,12 +232,12 @@ internal class Program
         Console.WriteLine($"{name} with ID {id} deleted.");
     }
 
-
+    
 }
+   
 
 
 
 
 
-
-
+  

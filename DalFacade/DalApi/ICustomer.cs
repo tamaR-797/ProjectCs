@@ -1,11 +1,10 @@
-﻿using DO;
+﻿
 
+using DO;
 
 namespace DalApi
 {
-    public  interface ICustomer:ICrud<Customer>
+    public interface ICustomer : ICrud<Customer>
     {
-
-       
     }
 }

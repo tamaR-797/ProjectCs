@@ -1,13 +1,19 @@
 ﻿
 namespace DalApi
 {
-    public interface ICrud<T> 
+    public interface ICrud<T>
     {
-        int Create(T t);
         T Read(int id);
-        T Read(Func<T, bool> filter);
-        List<T> ReadAll(Func<T, bool>? filter = null);
-        void Update(T t);
+
+        T Read(Func<T , bool> filter);
+
+        List<T> ReadAll(Func<T,bool>? filter =null);
+
+        int Create(T item);
+
+        void Update(T item);
+
         void Delete(int id);
+    
     }
 }

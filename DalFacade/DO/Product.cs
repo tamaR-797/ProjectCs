@@ -14,7 +14,7 @@ namespace DO
          int amount_in_stock)
     {
 
-        public Product() : this(0, Categories.SHIRTS, "", 0, 0)
+        public Product():this(0, Categories.SHIRTS,"",0,0)
         {
         }
 

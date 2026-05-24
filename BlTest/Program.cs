@@ -24,7 +24,7 @@ namespace BLTest
             try
             {
                 // אתחול נתונים מ-DAL
-                DalTest.Initalization.initialize();
+                DalTest.Initializatation.initialize();
                 Console.OutputEncoding = System.Text.Encoding.UTF8;
                 Console.WriteLine("✅ נתונים אותחלו בהצלחה מ-DalTest\n");
 
@@ -204,7 +204,7 @@ namespace BLTest
                     Console.WriteLine("║ רשימת מוצרים זמינים:        ║");
                     Console.WriteLine("╚────────────────────────────────────────╝\n");
 
-
+                    
                     // הצג רשימת מוצרים
                     foreach (var prod in allProducts)
                     {

@@ -3,15 +3,15 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace BlApi
 {
-    public interface IBl
+    public interface  IBl
     {
         public ISale ISale { get; }
-
+        
         public IProduct IProduct { get; }
-
+        
         public IClient IClient { get; }
 
-        public IOrder IOrder { get; }
+      public IOrder IOrder { get; }
 
     }
 }

@@ -1,4 +1,4 @@
-﻿using BO;
+using BO;
 namespace BlApi;
 
 public interface IClient : Icrud<Client>

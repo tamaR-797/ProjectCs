@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DO
 {
-    public record Sale(
+    public record Sale( 
         int id,
          int product_id,
          int amount_to_sale,
@@ -15,9 +15,9 @@ namespace DO
          DateTime start_date,
          DateTime end_date)
     {
+        
 
-
-        public Sale() : this(0, 0, 0, 0, false, DateTime.Now, DateTime.Today)
+        public Sale():this(0,0,0,0,false,DateTime.Now,DateTime.Today)
         {
         }
 
@@ -27,6 +27,6 @@ namespace DO
                    $"Count to Sale: {count_to_sale}, To Club: {to_club}, " +
                    $"\n Start Date: {start_date}, End Date: {end_date}";
         }
-
+        
     }
 }
