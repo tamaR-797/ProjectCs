@@ -93,3 +93,9 @@ C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.dll
 C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\refint\DalList.dll
 C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\DalList.pdb
 C:\Users\suser\Documents\GitHub\ProjectCs\DalList\obj\Debug\ref\DalList.dll
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.csproj.AssemblyReference.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.AssemblyInfoInputs.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.AssemblyInfo.cs
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.csproj.CoreCompileInputs.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalList\obj\Debug\DalList.sourcelink.json

@@ -114,3 +114,9 @@ C:\Users\suser\Documents\GitHub\ProjectCs\DalTest\obj\Debug\refint\DalTest.dll
 C:\Users\suser\Documents\GitHub\ProjectCs\DalTest\obj\Debug\DalTest.pdb
 C:\Users\suser\Documents\GitHub\ProjectCs\DalTest\obj\Debug\DalTest.genruntimeconfig.cache
 C:\Users\suser\Documents\GitHub\ProjectCs\DalTest\obj\Debug\ref\DalTest.dll
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.csproj.AssemblyReference.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.AssemblyInfoInputs.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.AssemblyInfo.cs
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.csproj.CoreCompileInputs.cache
+C:\Users\משתמש\Desktop\עבודות\תשפ''ו\C#-כהן\ProjectCs\DalTest\obj\Debug\DalTest.sourcelink.json
