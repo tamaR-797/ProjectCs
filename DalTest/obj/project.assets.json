@@ -89,11 +89,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalTest\\DalTest.csproj",
+      "projectUniqueName": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalTest\\DalTest.csproj",
       "projectName": "DalTest",
-      "projectPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalTest\\DalTest.csproj",
+      "projectPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalTest\\DalTest.csproj",
       "packagesPath": "C:\\Users\\משתמש\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalTest\\obj\\",
+      "outputPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -116,17 +116,17 @@
           "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\ClassLibrary1\\DalXml.csproj": {
-              "projectPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\ClassLibrary1\\DalXml.csproj"
+            "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\ClassLibrary1\\DalXml.csproj": {
+              "projectPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\ClassLibrary1\\DalXml.csproj"
             },
-            "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalFacade\\DalFacade.csproj": {
-              "projectPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalFacade\\DalFacade.csproj"
+            "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalFacade\\DalFacade.csproj": {
+              "projectPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalFacade\\DalFacade.csproj"
             },
-            "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalList\\DalList.csproj": {
-              "projectPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\DalList\\DalList.csproj"
+            "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalList\\DalList.csproj": {
+              "projectPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\DalList\\DalList.csproj"
             },
-            "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\Tools\\Tools.csproj": {
-              "projectPath": "C:\\Users\\משתמש\\Desktop\\עבודות\\תשפ''ו\\C#-כהן\\ProjectCs\\Tools\\Tools.csproj"
+            "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\Tools\\Tools.csproj": {
+              "projectPath": "C:\\Users\\משתמש\\Desktop\\Projects_Dvora_C#\\ProjectCs\\Tools\\Tools.csproj"
             }
           }
         }
@@ -158,6 +158,11 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }

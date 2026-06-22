@@ -7,4 +7,18 @@
     <price>143</price>
     <amount_in_stock>89</amount_in_stock>
   </Product>
+  <Product>
+    <id>1032</id>
+    <category>SHIRTS</category>
+    <product_name>floorsWhite</product_name>
+    <price>139</price>
+    <amount_in_stock>20</amount_in_stock>
+  </Product>
+  <Product>
+    <id>1033</id>
+    <category>PANTS</category>
+    <product_name>תתת</product_name>
+    <price>10</price>
+    <amount_in_stock>20</amount_in_stock>
+  </Product>
 </ArrayOfProduct>

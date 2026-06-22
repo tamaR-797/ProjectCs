@@ -217,4 +217,18 @@
     <customer_phon>055</customer_phon>
     <isClubMember>true</isClubMember>
   </Customer>
+  <Customer>
+    <id>100</id>
+    <customer_name>dvora</customer_name>
+    <customer_adress>m</customer_adress>
+    <customer_phon>0</customer_phon>
+    <isClubMember>true</isClubMember>
+  </Customer>
+  <Customer>
+    <id>2</id>
+    <customer_name>תמר</customer_name>
+    <customer_adress>1</customer_adress>
+    <customer_phon>1</customer_phon>
+    <isClubMember>true</isClubMember>
+  </Customer>
 </ArrayOfCustomer>
